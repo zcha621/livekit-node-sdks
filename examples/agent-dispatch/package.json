@@ -12,6 +12,7 @@
     "lint": "eslint -f unix \"**/*.ts\""
   },
   "dependencies": {
+    "@livekit/protocol": "^1.43.1",
     "dotenv": "^16.4.5",
     "livekit-server-sdk": "workspace:*"
   },

@@ -1,0 +1,3 @@
+# Exclude files that are not included in tsconfig
+pages/meet.tsx
+test-client.ts

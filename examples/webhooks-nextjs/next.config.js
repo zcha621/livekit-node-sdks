@@ -3,8 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   serverRuntimeConfig: {
-    livekitApiKey: 'your-api-key',
-    livekitApiSecret: 'your-api-secret',
+    livekitApiKey: 'testkey',
+    livekitApiSecret: 'this-is-a-very-long-test-secret-with-at-least-32-characters',
   },
 };
 

@@ -73,7 +73,7 @@
   },
   "scripts": {
     "prebuild": "node -p \"'export const SDK_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
-    "build:ts": "pnpm prebuild && tsup --onSuccess \"tsc --declaration --emitDeclarationOnly\" && cp -r src/napi dist/ && cp -r src/napi/* dist/",
+    "build:ts": "pnpm prebuild && tsup --onSuccess \"tsc --declaration --emitDeclarationOnly\" && node copy-napi.js",
     "build": "pnpm build:ts && napi build --platform --release --dts native.d.ts --js native.cjs --pipe \"prettier -w\" src/napi",
     "artifacts": "pnpm build:ts && napi artifacts",
     "build:debug": "napi build --platform",
