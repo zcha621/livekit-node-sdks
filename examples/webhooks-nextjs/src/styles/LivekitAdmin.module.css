@@ -22,7 +22,13 @@
   margin-bottom: 20px;
 }
 
-.navLinks a {
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.navLink {
   margin-right: 1rem;
   color: #0070f3;
   text-decoration: none;
@@ -58,7 +64,7 @@
   margin-top: 0;
 }
 
-.input {
+.inputField {
   padding: 8px;
   width: 100%;
   margin-bottom: 10px;
@@ -66,12 +72,16 @@
   border-radius: 4px;
 }
 
-.checkbox {
+.checkboxGroup {
+  margin-bottom: 10px;
+}
+
+.checkboxLabel {
   display: block;
   margin-bottom: 5px;
 }
 
-.checkbox input {
+.checkbox {
   margin-right: 5px;
 }
 
@@ -102,7 +112,7 @@
   background-color: #fafafa;
 }
 
-.tokenCard.expired {
+.tokenCardExpired {
   background-color: #fee;
 }
 
@@ -112,7 +122,7 @@
   margin-bottom: 8px;
 }
 
-.tokenRoom {
+.tokenRoomName {
   font-size: 1.1rem;
   font-weight: bold;
 }
@@ -120,26 +130,35 @@
 .tokenCountdown {
   font-size: 0.875rem;
   font-weight: bold;
+}
+
+.tokenCountdownActive {
   color: #28a745;
 }
 
-.tokenCountdown.expired {
+.tokenCountdownExpired {
   color: #c00;
 }
 
-.tokenInfo {
+.tokenParticipant {
   font-size: 0.875rem;
   color: #666;
   margin-bottom: 6px;
 }
 
-.tokenMeta {
+.tokenPermissions {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.tokenTimestamp {
   font-size: 0.75rem;
   color: #999;
   margin-bottom: 4px;
 }
 
-.tokenString {
+.tokenValue {
   font-family: monospace;
   font-size: 0.7rem;
   background: #fff;
@@ -147,9 +166,12 @@
   border-radius: 4px;
   border: 1px solid #e0e0e0;
   word-break: break-all;
+  overflow-wrap: break-word;
   margin-bottom: 10px;
   max-height: 60px;
   overflow-y: auto;
+  overflow-x: hidden;
+  white-space: pre-wrap;
 }
 
 .tokenActions {
@@ -178,6 +200,28 @@
   font-size: 0.875rem;
 }
 
+.emptyMessage {
+  color: #666;
+}
+
+.card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.cardHeader h2 {
+  margin: 0;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -200,7 +244,7 @@
   padding: 10px;
 }
 
-.tableRow.selected {
+.selectedRow {
   background: #e3f2fd;
 }
 
