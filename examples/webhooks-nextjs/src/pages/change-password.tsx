@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
+import passwordStyles from '../styles/ChangePassword.module.css';
 
 export default function ChangePassword() {
   const router = useRouter();
@@ -89,32 +90,37 @@ export default function ChangePassword() {
   return (
     <div className={styles.container}>
       <main className={styles.main}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '2rem' }}>
+        <div className={passwordStyles.backLink}>
+          <Link href="/">
+            <a className={passwordStyles.backLinkAnchor}>← Home</a>
+          </Link>
+        </div>
+        <div className={passwordStyles.header}>
           <h1 className={styles.title}>Change Password</h1>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className={passwordStyles.navButtons}>
             <Link href="/agent-config">
-              <a style={{ padding: '0.5rem 1rem', background: '#0070f3', color: 'white', borderRadius: '5px', textDecoration: 'none' }}>
+              <a className={passwordStyles.navButton}>
                 Agent Config
               </a>
             </Link>
             <Link href="/agent-builder">
-              <a style={{ padding: '0.5rem 1rem', background: '#0070f3', color: 'white', borderRadius: '5px', textDecoration: 'none' }}>
+              <a className={passwordStyles.navButton}>
                 Agent Builder
               </a>
             </Link>
             <Link href="/livekit-admin">
-              <a style={{ padding: '0.5rem 1rem', background: '#0070f3', color: 'white', borderRadius: '5px', textDecoration: 'none' }}>
+              <a className={passwordStyles.navButton}>
                 LiveKit Admin
               </a>
             </Link>
             <Link href="/admin-users">
-              <a style={{ padding: '0.5rem 1rem', background: '#0070f3', color: 'white', borderRadius: '5px', textDecoration: 'none' }}>
+              <a className={passwordStyles.navButton}>
                 Admin Users
               </a>
             </Link>
             <button
               onClick={handleLogout}
-              style={{ padding: '0.5rem 1rem', background: '#dc3545', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+              className={passwordStyles.logoutButton}
             >
               Logout
             </button>
@@ -122,102 +128,67 @@ export default function ChangePassword() {
         </div>
 
         {message && (
-          <div style={{
-            padding: '1rem',
-            marginBottom: '1rem',
-            borderRadius: '5px',
-            backgroundColor: messageType === 'success' ? '#d4edda' : '#f8d7da',
-            color: messageType === 'success' ? '#155724' : '#721c24',
-            border: `1px solid ${messageType === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
-            maxWidth: '600px',
-            margin: '0 auto 2rem'
-          }}>
+          <div className={`${passwordStyles.messageBox} ${messageType === 'success' ? passwordStyles.messageSuccess : passwordStyles.messageError}`}>
             {message}
           </div>
         )}
 
-        <div style={{
-          maxWidth: '600px',
-          margin: '0 auto',
-          padding: '2rem',
-          border: '1px solid #ddd',
-          borderRadius: '8px',
-          backgroundColor: '#f9f9f9'
-        }}>
-          <h2 style={{ marginTop: 0, textAlign: 'center' }}>Change Your Password</h2>
+        <div className={passwordStyles.formCard}>
+          <h2 className={passwordStyles.formTitle}>Change Your Password</h2>
           
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            <div className={passwordStyles.formGroup}>
+              <label className={passwordStyles.formLabel}>
                 Current Password *
               </label>
               <input
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  fontSize: '16px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc'
-                }}
+                className={passwordStyles.formInput}
                 required
                 disabled={loading}
               />
             </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            <div className={passwordStyles.formGroup}>
+              <label className={passwordStyles.formLabel}>
                 New Password * (minimum 8 characters)
               </label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  fontSize: '16px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc'
-                }}
+                className={passwordStyles.formInput}
                 minLength={8}
                 required
                 disabled={loading}
               />
             </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            <div className={passwordStyles.formGroup}>
+              <label className={passwordStyles.formLabel}>
                 Confirm New Password *
               </label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  fontSize: '16px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                  borderColor: confirmPassword && newPassword !== confirmPassword ? '#dc3545' : '#ccc'
-                }}
+                className={`${passwordStyles.formInput} ${confirmPassword && newPassword !== confirmPassword ? passwordStyles.formInputError : ''}`}
                 minLength={8}
                 required
                 disabled={loading}
               />
               {confirmPassword && newPassword !== confirmPassword && (
-                <small style={{ color: '#dc3545', marginTop: '0.25rem', display: 'block' }}>
+                <small className={passwordStyles.validationError}>
                   Passwords do not match
                 </small>
               )}
             </div>
 
-            <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#e7f3ff', borderRadius: '4px', fontSize: '14px' }}>
+            <div className={passwordStyles.requirementsBox}>
               <strong>Password Requirements:</strong>
-              <ul style={{ margin: '0.5rem 0 0 1.5rem', paddingLeft: 0 }}>
+              <ul className={passwordStyles.requirementsList}>
                 <li>At least 8 characters long</li>
                 <li>Should include a mix of letters, numbers, and symbols</li>
                 <li>Avoid using common words or personal information</li>
@@ -227,17 +198,7 @@ export default function ChangePassword() {
             <button
               type="submit"
               disabled={loading || Boolean(confirmPassword && newPassword !== confirmPassword)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                background: loading ? '#6c757d' : '#0070f3',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '16px',
-                fontWeight: 'bold'
-              }}
+              className={passwordStyles.submitButton}
             >
               {loading ? 'Changing Password...' : 'Change Password'}
             </button>

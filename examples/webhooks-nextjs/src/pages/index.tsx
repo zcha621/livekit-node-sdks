@@ -51,6 +51,13 @@ const Home: NextPage = () => {
             </a>
           </Link>
 
+          <Link href="/livekit-admin">
+            <a className={styles.card}>
+              <h2>LiveKit Admin &rarr;</h2>
+              <p>Manage rooms, participants, and tokens with live monitoring.</p>
+            </a>
+          </Link>
+
           <Link href="/meet">
             <a className={styles.card}>
               <h2>Video Conference &rarr;</h2>

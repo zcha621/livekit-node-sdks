@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
+import styles from '../styles/LivekitAdmin.module.css';
 
 interface Room {
   sid: string;
@@ -20,11 +21,36 @@ interface Participant {
   joinedAt: number;
 }
 
+interface GeneratedToken {
+  id: string;
+  token: string;
+  roomName: string;
+  participantName: string;
+  canPublish: boolean;
+  canSubscribe: boolean;
+  generatedAt: number;
+  expiresAt: number;
+}
+
+// Decode JWT token to get expiry time
+const decodeToken = (token: string): { exp?: number; identity?: string } => {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return {};
+    const payload = JSON.parse(atob(parts[1]));
+    return payload;
+  } catch (error) {
+    console.error('Failed to decode token:', error);
+    return {};
+  }
+};
+
 export default function Admin() {
   const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [tokens, setTokens] = useState<GeneratedToken[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -32,13 +58,20 @@ export default function Admin() {
   const [newRoomName, setNewRoomName] = useState('');
   const [tokenRoomName, setTokenRoomName] = useState('');
   const [tokenParticipantName, setTokenParticipantName] = useState('');
-  const [generatedToken, setGeneratedToken] = useState('');
   const [canPublish, setCanPublish] = useState(true);
   const [canSubscribe, setCanSubscribe] = useState(true);
 
   // Check authentication on mount
   useEffect(() => {
     checkAuth();
+  }, []);
+
+  // Update token countdown every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTokens(prev => [...prev]); // Force re-render for countdown
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const checkAuth = async () => {
@@ -49,8 +82,22 @@ export default function Admin() {
         return;
       }
       loadRooms();
+      loadTokens();
     } catch (error) {
       router.push('/login');
+    }
+  };
+
+  const loadTokens = () => {
+    const stored = localStorage.getItem('generated_tokens');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Filter out expired tokens
+      const active = parsed.filter((t: GeneratedToken) => t.expiresAt > Date.now());
+      setTokens(active);
+      if (active.length !== parsed.length) {
+        localStorage.setItem('generated_tokens', JSON.stringify(active));
+      }
     }
   };
 
@@ -192,7 +239,28 @@ export default function Admin() {
       });
       const data = await response.json();
       if (response.ok) {
-        setGeneratedToken(data.token);
+        // Decode the token to get actual expiry time
+        const decoded = decodeToken(data.token);
+        const expiresAt = decoded.exp ? decoded.exp * 1000 : Date.now() + (10 * 60 * 60 * 1000);
+
+        const newToken: GeneratedToken = {
+          id: Date.now().toString(),
+          token: data.token,
+          roomName: tokenRoomName,
+          participantName: tokenParticipantName,
+          canPublish,
+          canSubscribe,
+          generatedAt: Date.now(),
+          expiresAt,
+        };
+
+        const updated = [...tokens, newToken];
+        setTokens(updated);
+        localStorage.setItem('generated_tokens', JSON.stringify(updated));
+
+        // Clear form
+        setTokenRoomName('');
+        setTokenParticipantName('');
       } else {
         setError(data.error || 'Failed to generate token');
       }
@@ -203,47 +271,82 @@ export default function Admin() {
     }
   };
 
+  const copyToken = (token: string) => {
+    navigator.clipboard.writeText(token);
+    setError('Token copied to clipboard!');
+    setTimeout(() => setError(''), 2000);
+  };
+
+  const deleteToken = (id: string) => {
+    const updated = tokens.filter(t => t.id !== id);
+    setTokens(updated);
+    localStorage.setItem('generated_tokens', JSON.stringify(updated));
+  };
+
+  const formatCountdown = (expiresAt: number) => {
+    const diff = expiresAt - Date.now();
+    if (diff <= 0) return 'Expired';
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  const formatDateTime = (timestamp: number) => {
+    return new Date(timestamp).toLocaleString();
+  };
+
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto', fontFamily: 'system-ui' }}>
+    <div className={styles.pageContainer}>
       <Head>
         <title>LiveKit Admin Dashboard</title>
       </Head>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div className={styles.backLink}>
+        <Link href="/">
+          <a className={styles.backLinkAnchor}>← Home</a>
+        </Link>
+      </div>
+      <div className={styles.header}>
         <h1>LiveKit Admin Dashboard</h1>
-        <div>
+        <div className={styles.navLinks}>
           <Link href="/agent-config">
-            <a style={{ marginRight: '1rem', color: '#0070f3', textDecoration: 'none' }}>Agent Config</a>
+            <a className={styles.navLink}>Agent Config</a>
           </Link>
           <Link href="/agent-builder">
-            <a style={{ marginRight: '1rem', color: '#0070f3', textDecoration: 'none' }}>Agent Builder</a>
+            <a className={styles.navLink}>Agent Builder</a>
           </Link>
           <Link href="/admin-users">
-            <a style={{ marginRight: '1rem', color: '#0070f3', textDecoration: 'none' }}>Admin Users</a>
+            <a className={styles.navLink}>Admin Users</a>
           </Link>
           <Link href="/change-password">
-            <a style={{ marginRight: '1rem', color: '#0070f3', textDecoration: 'none' }}>Change Password</a>
+            <a className={styles.navLink}>Change Password</a>
           </Link>
-          <button onClick={handleLogout} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
+          <Link href="/meet">
+            <a className={styles.navLink}>Join Room</a>
+          </Link>
+          <button onClick={handleLogout} className={styles.logoutButton}>
             Logout
           </button>
         </div>
       </div>
 
       {error && (
-        <div style={{ padding: '10px', background: '#fee', border: '1px solid #c00', borderRadius: '4px', marginBottom: '20px' }}>
+        <div className={styles.errorMessage}>
           {error}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+      <div className={styles.twoColumnGrid}>
         {/* Create Room */}
-        <div style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px' }}>
+        <div className={styles.card}>
           <h2>Create Room</h2>
           <form onSubmit={createRoom}>
             <input
@@ -251,12 +354,12 @@ export default function Admin() {
               value={newRoomName}
               onChange={(e) => setNewRoomName(e.target.value)}
               placeholder="Room name"
-              style={{ padding: '8px', width: '100%', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+              className={styles.inputField}
             />
             <button
               type="submit"
               disabled={loading}
-              style={{ padding: '8px 16px', background: '#0070f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              className={styles.submitButton}
             >
               Create Room
             </button>
@@ -264,7 +367,7 @@ export default function Admin() {
         </div>
 
         {/* Generate Token */}
-        <div style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px' }}>
+        <div className={styles.card}>
           <h2>Generate Access Token</h2>
           <form onSubmit={generateToken}>
             <input
@@ -272,31 +375,31 @@ export default function Admin() {
               value={tokenRoomName}
               onChange={(e) => setTokenRoomName(e.target.value)}
               placeholder="Room name"
-              style={{ padding: '8px', width: '100%', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+              className={styles.inputField}
             />
             <input
               type="text"
               value={tokenParticipantName}
               onChange={(e) => setTokenParticipantName(e.target.value)}
               placeholder="Participant name"
-              style={{ padding: '8px', width: '100%', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+              className={styles.inputField}
             />
-            <div style={{ marginBottom: '10px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>
+            <div className={styles.checkboxGroup}>
+              <label className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
                   checked={canPublish}
                   onChange={(e) => setCanPublish(e.target.checked)}
-                  style={{ marginRight: '5px' }}
+                  className={styles.checkbox}
                 />
                 Can Publish
               </label>
-              <label style={{ display: 'block' }}>
+              <label className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
                   checked={canSubscribe}
                   onChange={(e) => setCanSubscribe(e.target.checked)}
-                  style={{ marginRight: '5px' }}
+                  className={styles.checkbox}
                 />
                 Can Subscribe
               </label>
@@ -304,77 +407,112 @@ export default function Admin() {
             <button
               type="submit"
               disabled={loading}
-              style={{ padding: '8px 16px', background: '#0070f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              className={styles.submitButton}
             >
               Generate Token
             </button>
           </form>
-          {generatedToken && (
-            <div style={{ marginTop: '10px', padding: '10px', background: '#f0f0f0', borderRadius: '4px', wordBreak: 'break-all', fontSize: '12px' }}>
-              <strong>Token:</strong>
-              <div style={{ marginTop: '5px' }}>{generatedToken}</div>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(generatedToken);
-                  alert('Token copied to clipboard!');
-                }}
-                style={{ marginTop: '10px', padding: '4px 8px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-              >
-                Copy Token
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
+      {/* Generated Tokens */}
+      <div className={styles.card}>
+        <h2>Generated Tokens ({tokens.length})</h2>
+        {tokens.length === 0 ? (
+          <p className={styles.emptyMessage}>No tokens generated yet. Use the form above to create one.</p>
+        ) : (
+          <div className={styles.tokensGrid}>
+            {tokens.map((t) => (
+              <div
+                key={t.id}
+                className={`${styles.tokenCard} ${t.expiresAt <= Date.now() ? styles.tokenCardExpired : ''}`}
+              >
+                <div className={styles.tokenHeader}>
+                  <strong className={styles.tokenRoomName}>{t.roomName}</strong>
+                  <span className={`${styles.tokenCountdown} ${t.expiresAt <= Date.now() ? styles.tokenCountdownExpired : styles.tokenCountdownActive}`}>
+                    {formatCountdown(t.expiresAt)}
+                  </span>
+                </div>
+                <div className={styles.tokenParticipant}>
+                  Participant: {t.participantName}
+                </div>
+                <div className={styles.tokenPermissions}>
+                  Permissions: {t.canPublish ? '✓ Publish' : '✗ Publish'} | {t.canSubscribe ? '✓ Subscribe' : '✗ Subscribe'}
+                </div>
+                <div className={styles.tokenTimestamp}>
+                  Generated: {formatDateTime(t.generatedAt)}
+                </div>
+                <div className={styles.tokenTimestamp}>
+                  Expires: {formatDateTime(t.expiresAt)}
+                </div>
+                <div className={styles.tokenValue}>
+                  {t.token}
+                </div>
+                <div className={styles.tokenActions}>
+                  <button
+                    onClick={() => copyToken(t.token)}
+                    className={styles.copyButton}
+                  >
+                    Copy
+                  </button>
+                  <button
+                    onClick={() => deleteToken(t.id)}
+                    className={styles.deleteButton}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Rooms List */}
-      <div style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          <h2 style={{ margin: 0 }}>Active Rooms ({rooms.length})</h2>
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <h2>Active Rooms ({rooms.length})</h2>
           <button
             onClick={loadRooms}
             disabled={loading}
-            style={{ padding: '6px 12px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+            className={styles.refreshButton}
           >
             Refresh
           </button>
         </div>
         {rooms.length === 0 ? (
-          <p style={{ color: '#666' }}>No active rooms</p>
+          <p className={styles.emptyMessage}>No active rooms</p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className={styles.table}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #ddd' }}>
-                <th style={{ textAlign: 'left', padding: '10px' }}>Room Name</th>
-                <th style={{ textAlign: 'left', padding: '10px' }}>Participants</th>
-                <th style={{ textAlign: 'left', padding: '10px' }}>Max Participants</th>
-                <th style={{ textAlign: 'left', padding: '10px' }}>Created</th>
-                <th style={{ textAlign: 'left', padding: '10px' }}>Actions</th>
+              <tr>
+                <th>Room Name</th>
+                <th>Participants</th>
+                <th>Max Participants</th>
+                <th>Created</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {rooms.map((room) => (
                 <tr
                   key={room.sid}
-                  style={{
-                    borderBottom: '1px solid #eee',
-                    background: selectedRoom === room.name ? '#e3f2fd' : 'transparent',
-                  }}
+                  className={selectedRoom === room.name ? styles.selectedRow : ''}
                 >
-                  <td style={{ padding: '10px' }}>{room.name}</td>
-                  <td style={{ padding: '10px' }}>{room.numParticipants}</td>
-                  <td style={{ padding: '10px' }}>{room.maxParticipants || 'Unlimited'}</td>
-                  <td style={{ padding: '10px' }}>{new Date(room.creationTime * 1000).toLocaleString()}</td>
-                  <td style={{ padding: '10px' }}>
+                  <td>{room.name}</td>
+                  <td>{room.numParticipants}</td>
+                  <td>{room.maxParticipants || 'Unlimited'}</td>
+                  <td>{new Date(room.creationTime * 1000).toLocaleString()}</td>
+                  <td>
                     <button
                       onClick={() => setSelectedRoom(room.name)}
-                      style={{ marginRight: '5px', padding: '4px 8px', background: '#17a2b8', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                      className={styles.viewButton}
                     >
                       View
                     </button>
                     <button
                       onClick={() => deleteRoom(room.name)}
-                      style={{ padding: '4px 8px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                      className={styles.deleteButton}
                     >
                       Delete
                     </button>
@@ -388,32 +526,32 @@ export default function Admin() {
 
       {/* Participants */}
       {selectedRoom && (
-        <div style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px' }}>
+        <div className={styles.card}>
           <h2>Participants in "{selectedRoom}"</h2>
           {participants.length === 0 ? (
-            <p style={{ color: '#666' }}>No participants in this room</p>
+            <p className={styles.emptyMessage}>No participants in this room</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table className={styles.table}>
               <thead>
-                <tr style={{ borderBottom: '2px solid #ddd' }}>
-                  <th style={{ textAlign: 'left', padding: '10px' }}>Identity</th>
-                  <th style={{ textAlign: 'left', padding: '10px' }}>Name</th>
-                  <th style={{ textAlign: 'left', padding: '10px' }}>State</th>
-                  <th style={{ textAlign: 'left', padding: '10px' }}>Joined At</th>
-                  <th style={{ textAlign: 'left', padding: '10px' }}>Actions</th>
+                <tr>
+                  <th>Identity</th>
+                  <th>Name</th>
+                  <th>State</th>
+                  <th>Joined At</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {participants.map((participant) => (
-                  <tr key={participant.sid} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '10px' }}>{participant.identity}</td>
-                    <td style={{ padding: '10px' }}>{participant.name || '-'}</td>
-                    <td style={{ padding: '10px' }}>{participant.state}</td>
-                    <td style={{ padding: '10px' }}>{new Date(participant.joinedAt * 1000).toLocaleString()}</td>
-                    <td style={{ padding: '10px' }}>
+                  <tr key={participant.sid}>
+                    <td>{participant.identity}</td>
+                    <td>{participant.name || '-'}</td>
+                    <td>{participant.state}</td>
+                    <td>{new Date(participant.joinedAt * 1000).toLocaleString()}</td>
+                    <td>
                       <button
                         onClick={() => removeParticipant(selectedRoom, participant.identity)}
-                        style={{ padding: '4px 8px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                        className={styles.deleteButton}
                       >
                         Remove
                       </button>

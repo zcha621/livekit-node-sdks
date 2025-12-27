@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
+import adminStyles from '../styles/AdminUsers.module.css';
 
 interface AdminUser {
   admin_id: number;
@@ -158,32 +159,37 @@ export default function AdminUsers() {
   return (
     <div className={styles.container}>
       <main className={styles.main}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '2rem' }}>
+        <div className={adminStyles.backLink}>
+          <Link href="/">
+            <a className={adminStyles.backLinkAnchor}>← Home</a>
+          </Link>
+        </div>
+        <div className={adminStyles.header}>
           <h1 className={styles.title}>Admin User Management</h1>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className={adminStyles.navButtons}>
             <Link href="/agent-config">
-              <a style={{ padding: '0.5rem 1rem', background: '#0070f3', color: 'white', borderRadius: '5px', textDecoration: 'none' }}>
+              <a className={adminStyles.navButton}>
                 Agent Config
               </a>
             </Link>
             <Link href="/agent-builder">
-              <a style={{ padding: '0.5rem 1rem', background: '#0070f3', color: 'white', borderRadius: '5px', textDecoration: 'none' }}>
+              <a className={adminStyles.navButton}>
                 Agent Builder
               </a>
             </Link>
             <Link href="/livekit-admin">
-              <a style={{ padding: '0.5rem 1rem', background: '#0070f3', color: 'white', borderRadius: '5px', textDecoration: 'none' }}>
+              <a className={adminStyles.navButton}>
                 LiveKit Admin
               </a>
             </Link>
             <Link href="/change-password">
-              <a style={{ padding: '0.5rem 1rem', background: '#28a745', color: 'white', borderRadius: '5px', textDecoration: 'none' }}>
+              <a className={`${adminStyles.navButton} ${adminStyles.navButtonHighlight}`}>
                 Change Password
               </a>
             </Link>
             <button
               onClick={handleLogout}
-              style={{ padding: '0.5rem 1rem', background: '#dc3545', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+              className={adminStyles.logoutButton}
             >
               Logout
             </button>
@@ -191,107 +197,78 @@ export default function AdminUsers() {
         </div>
 
         {message && (
-          <div style={{
-            padding: '1rem',
-            marginBottom: '1rem',
-            borderRadius: '5px',
-            backgroundColor: messageType === 'success' ? '#d4edda' : '#f8d7da',
-            color: messageType === 'success' ? '#155724' : '#721c24',
-            border: `1px solid ${messageType === 'success' ? '#c3e6cb' : '#f5c6cb'}`
-          }}>
+          <div className={`${adminStyles.messageBox} ${messageType === 'success' ? adminStyles.messageSuccess : adminStyles.messageError}`}>
             {message}
           </div>
         )}
 
-        <div style={{ marginBottom: '2rem' }}>
+        <div className={adminStyles.createButtonContainer}>
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontSize: '16px'
-            }}
+            className={adminStyles.createButton}
           >
             {showCreateForm ? 'Cancel' : '+ Create New Admin User'}
           </button>
         </div>
 
         {showCreateForm && (
-          <div style={{
-            padding: '2rem',
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            marginBottom: '2rem',
-            backgroundColor: '#f9f9f9'
-          }}>
-            <h2 style={{ marginTop: 0 }}>Create New Admin User</h2>
+          <div className={adminStyles.form}>
+            <h2 className={adminStyles.formTitle}>Create New Admin User</h2>
             <form onSubmit={handleCreateUser}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              <div className={adminStyles.formGroup}>
+                <label className={adminStyles.formLabel}>
                   Username *
                 </label>
                 <input
                   type="text"
                   value={newUser.username}
                   onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                  style={{ width: '100%', padding: '0.5rem', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
+                  className={adminStyles.formInput}
                   required
                 />
               </div>
 
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              <div className={adminStyles.formGroup}>
+                <label className={adminStyles.formLabel}>
                   Password * (minimum 8 characters)
                 </label>
                 <input
                   type="password"
                   value={newUser.password}
                   onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  style={{ width: '100%', padding: '0.5rem', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
+                  className={adminStyles.formInput}
                   minLength={8}
                   required
                 />
               </div>
 
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              <div className={adminStyles.formGroup}>
+                <label className={adminStyles.formLabel}>
                   Email
                 </label>
                 <input
                   type="email"
                   value={newUser.email}
                   onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  style={{ width: '100%', padding: '0.5rem', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
+                  className={adminStyles.formInput}
                 />
               </div>
 
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              <div className={adminStyles.formGroup}>
+                <label className={adminStyles.formLabel}>
                   Full Name
                 </label>
                 <input
                   type="text"
                   value={newUser.full_name}
                   onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
-                  style={{ width: '100%', padding: '0.5rem', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
+                  className={adminStyles.formInput}
                 />
               </div>
 
               <button
                 type="submit"
-                style={{
-                  padding: '0.75rem 2rem',
-                  background: '#0070f3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontSize: '16px'
-                }}
+                className={adminStyles.submitButton}
               >
                 Create Admin User
               </button>
@@ -302,74 +279,45 @@ export default function AdminUsers() {
         {loading ? (
           <p>Loading admin users...</p>
         ) : (
-          <div style={{ width: '100%', overflowX: 'auto' }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              backgroundColor: 'white',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              borderRadius: '8px'
-            }}>
+          <div className={adminStyles.tableContainer}>
+            <table className={adminStyles.table}>
               <thead>
-                <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>ID</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Username</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Full Name</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Email</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Last Login</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Created</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Actions</th>
+                <tr>
+                  <th>ID</th>
+                  <th>Username</th>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Last Login</th>
+                  <th>Created</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.admin_id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                    <td style={{ padding: '1rem' }}>{user.admin_id}</td>
-                    <td style={{ padding: '1rem', fontWeight: 'bold' }}>{user.username}</td>
-                    <td style={{ padding: '1rem' }}>{user.full_name || '-'}</td>
-                    <td style={{ padding: '1rem' }}>{user.email || '-'}</td>
-                    <td style={{ padding: '1rem' }}>
-                      <span style={{
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '12px',
-                        fontSize: '14px',
-                        backgroundColor: user.is_active ? '#d4edda' : '#f8d7da',
-                        color: user.is_active ? '#155724' : '#721c24'
-                      }}>
+                  <tr key={user.admin_id}>
+                    <td>{user.admin_id}</td>
+                    <td className={adminStyles.usernameCell}>{user.username}</td>
+                    <td>{user.full_name || '-'}</td>
+                    <td>{user.email || '-'}</td>
+                    <td>
+                      <span className={`${adminStyles.statusBadge} ${user.is_active ? adminStyles.statusActive : adminStyles.statusInactive}`}>
                         {user.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem', fontSize: '14px' }}>{formatDate(user.last_login)}</td>
-                    <td style={{ padding: '1rem', fontSize: '14px' }}>{formatDate(user.created_at)}</td>
-                    <td style={{ padding: '1rem' }}>
+                    <td className={adminStyles.dateCell}>{formatDate(user.last_login)}</td>
+                    <td className={adminStyles.dateCell}>{formatDate(user.created_at)}</td>
+                    <td>
                       <button
                         onClick={() => handleToggleActive(user.admin_id, user.is_active)}
-                        style={{
-                          padding: '0.25rem 0.75rem',
-                          marginRight: '0.5rem',
-                          background: user.is_active ? '#ffc107' : '#28a745',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '14px'
-                        }}
+                        className={`${adminStyles.actionButton} ${user.is_active ? adminStyles.deactivateButton : adminStyles.activateButton}`}
                       >
                         {user.is_active ? 'Deactivate' : 'Activate'}
                       </button>
                       {user.is_active && (
                         <button
                           onClick={() => handleDeactivate(user.admin_id)}
-                          style={{
-                            padding: '0.25rem 0.75rem',
-                            background: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                          }}
+                          className={`${adminStyles.actionButton} ${adminStyles.deleteButton}`}
                         >
                           Delete
                         </button>
@@ -381,7 +329,7 @@ export default function AdminUsers() {
             </table>
 
             {users.length === 0 && (
-              <p style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+              <p className={adminStyles.emptyMessage}>
                 No admin users found
               </p>
             )}

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
+import builderStyles from '../styles/AgentBuilder.module.css';
 import { v4 as uuidv4 } from 'uuid';
 
 interface AgentType {
@@ -72,6 +73,11 @@ export default function AgentBuilder() {
   
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+  };
 
   useEffect(() => {
     checkAuth();
@@ -253,11 +259,6 @@ export default function AgentBuilder() {
     setTimeout(() => setMessage(''), 5000);
   };
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
-  };
-
   if (loading) {
     return (
       <div className={styles.container}>
@@ -277,6 +278,11 @@ export default function AgentBuilder() {
       </Head>
 
       <main className={styles.main}>
+        <div style={{ alignSelf: 'flex-start', marginBottom: '10px' }}>
+          <Link href="/">
+            <a style={{ color: '#0070f3', textDecoration: 'none', fontSize: '0.9rem' }}>← Home</a>
+          </Link>
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '1200px' }}>
           <h1 className={styles.title}>Agent Builder</h1>
           <div>

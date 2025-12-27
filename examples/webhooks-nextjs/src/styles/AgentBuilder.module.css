@@ -1,0 +1,216 @@
+.backLink {
+  align-self: flex-start;
+  margin-bottom: 10px;
+}
+
+.backLinkAnchor {
+  color: #0070f3;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.navLinks a {
+  margin-right: 1rem;
+  color: #0070f3;
+}
+
+.logoutButton {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.messageBox {
+  width: 100%;
+  max-width: 1200px;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.messageBox.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.messageBox.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.tabNavigation {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 2rem;
+  border-bottom: 2px solid #eaeaea;
+}
+
+.tabButtons {
+  display: flex;
+  gap: 1rem;
+}
+
+.tabButton {
+  padding: 1rem 2rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  cursor: pointer;
+  font-weight: normal;
+  color: #666;
+}
+
+.tabButton.active {
+  border-bottom-color: #0070f3;
+  font-weight: bold;
+  color: #0070f3;
+}
+
+.tabContent {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 2rem;
+}
+
+.formCard {
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  padding: 2rem;
+}
+
+.formCard h2 {
+  margin-top: 0;
+}
+
+.formGrid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formLabel {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+.formTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.formSelect {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+.submitButton {
+  margin-top: 1.5rem;
+  padding: 0.75rem 2rem;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.helpText {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.capabilityList {
+  display: grid;
+  gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.capabilityItem {
+  padding: 1rem;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #fafafa;
+}
+
+.capabilityItem:hover {
+  background-color: #f0f0f0;
+}
+
+.capabilityItem.selected {
+  background-color: #e6f7ff;
+  border-color: #0070f3;
+}
+
+.capabilityCheckbox {
+  margin-right: 1rem;
+}
+
+.capabilityName {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.capabilityDescription {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.priorityInput {
+  width: 200px;
+  padding: 0.75rem;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+.linkButton {
+  margin-top: 1.5rem;
+  padding: 0.75rem 2rem;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.linkButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.linkSummary {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}

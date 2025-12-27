@@ -1,187 +1,162 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { LiveKitRoom, VideoConference, RoomAudioRenderer } from '@livekit/components-react';
 import '@livekit/components-styles';
+import styles from '../styles/Meet.module.css';
+
+// Type fix for React 18 compatibility
+const LiveKitRoomTyped = LiveKitRoom as any;
+
+// Read LiveKit URL from environment variable
+const livekitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'ws://localhost:7880';
 
 export default function Meet() {
-  const [roomName, setRoomName] = useState('');
-  const [participantName, setParticipantName] = useState('');
   const [token, setToken] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState('');
+  const [rememberToken, setRememberToken] = useState(false);
+
+  // Load saved token on mount
+  useEffect(() => {
+    const savedToken = localStorage.getItem('livekit_token');
+    if (savedToken) {
+      setToken(savedToken);
+      setRememberToken(true);
+    }
+  }, []);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomName.trim() || !participantName.trim()) {
-      setError('Room name and participant name are required');
+    if (!token.trim()) {
+      setError('Access token is required');
       return;
     }
 
     try {
       setError('');
-      const response = await fetch('/api/token/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomName: roomName.trim(),
-          participantName: participantName.trim(),
-          canPublish: true,
-          canSubscribe: true,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setToken(data.token);
-        setIsConnected(true);
+      
+      // Save token to localStorage if remember is checked
+      if (rememberToken) {
+        localStorage.setItem('livekit_token', token.trim());
       } else {
-        setError(data.error || 'Failed to generate token');
+        localStorage.removeItem('livekit_token');
       }
+
+      setIsConnected(true);
     } catch (err: any) {
       setError(err.message || 'Failed to join room');
     }
   };
 
   const handleDisconnect = () => {
-    setToken('');
     setIsConnected(false);
+  };
+
+  const handleClearToken = () => {
+    setToken('');
+    localStorage.removeItem('livekit_token');
+    setRememberToken(false);
   };
 
   if (isConnected && token) {
     return (
-      <div style={{ height: '100vh', width: '100vw' }}>
+      <div className={styles.fullScreenContainer}>
         <Head>
-          <title>{roomName} - LiveKit Meet</title>
+          <title>LiveKit Meet</title>
         </Head>
-        <LiveKitRoom
+        <LiveKitRoomTyped
           token={token}
-          serverUrl="ws://localhost:7880"
+          serverUrl={livekitUrl}
           connect={true}
           onDisconnected={handleDisconnect}
           style={{ height: '100%' }}
         >
-          <>
-            <VideoConference />
-            <RoomAudioRenderer />
-          </>
-        </LiveKitRoom>
+          <VideoConference />
+          <RoomAudioRenderer />
+        </LiveKitRoomTyped>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      fontFamily: 'system-ui'
-    }}>
+    <div className={styles.meetContainer}>
       <Head>
         <title>Join LiveKit Room</title>
       </Head>
 
-      <div style={{
-        background: 'white',
-        padding: '40px',
-        borderRadius: '12px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-        width: '100%',
-        maxWidth: '400px'
-      }}>
-        <h1 style={{ marginBottom: '30px', textAlign: 'center', color: '#333' }}>
+      <div className={styles.formCard}>
+        <div className={styles.navigation}>
+          <Link href="/">
+            <a className={styles.navLink}>← Home</a>
+          </Link>
+          <Link href="/livekit-admin">
+            <a className={styles.navLink}>← Admin Dashboard</a>
+          </Link>
+        </div>
+        <h1 className={styles.formTitle}>
           Join Room
         </h1>
 
         {error && (
-          <div style={{
-            padding: '12px',
-            background: '#fee',
-            border: '1px solid #c00',
-            borderRadius: '6px',
-            marginBottom: '20px',
-            color: '#c00'
-          }}>
+          <div className={styles.errorMessage}>
             {error}
           </div>
         )}
 
         <form onSubmit={handleJoin}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#555' }}>
-              Room Name
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Access Token
             </label>
-            <input
-              type="text"
-              value={roomName}
-              onChange={(e) => setRoomName(e.target.value)}
-              placeholder="Enter room name"
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #e0e0e0',
-                borderRadius: '6px',
-                fontSize: '16px',
-                boxSizing: 'border-box'
-              }}
+            <textarea
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="Paste your LiveKit access token here"
+              rows={4}
+              className={styles.textarea}
               required
             />
+            <small className={styles.helpText}>
+              Get a token from the admin dashboard or your backend
+            </small>
           </div>
 
-          <div style={{ marginBottom: '30px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#555' }}>
-              Your Name
-            </label>
+          <div className={styles.checkboxGroup}>
             <input
-              type="text"
-              value={participantName}
-              onChange={(e) => setParticipantName(e.target.value)}
-              placeholder="Enter your name"
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #e0e0e0',
-                borderRadius: '6px',
-                fontSize: '16px',
-                boxSizing: 'border-box'
-              }}
-              required
+              type="checkbox"
+              checked={rememberToken}
+              onChange={(e) => setRememberToken(e.target.checked)}
             />
+            <span>Remember token for next time</span>
           </div>
 
-          <button
-            type="submit"
-            style={{
-              width: '100%',
-              padding: '14px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'transform 0.2s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            Join Room
-          </button>
+          <div className={styles.buttonGroup}>
+            <button
+              type="submit"
+              className={styles.joinButton}
+            >
+              Join Room
+            </button>
+            
+            {token && (
+              <button
+                type="button"
+                onClick={handleClearToken}
+                className={styles.clearButton}
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </form>
 
-        <div style={{ 
-          marginTop: '20px', 
-          textAlign: 'center',
-          fontSize: '14px',
-          color: '#666'
-        }}>
+        <div className={styles.helpText}>
           <a 
-            href="/admin" 
-            style={{ color: '#667eea', textDecoration: 'none' }}
+            href="/livekit-admin" 
+            className={styles.navLink}
           >
-            Go to Admin Dashboard
+            Generate Token in Admin Dashboard →
           </a>
         </div>
       </div>

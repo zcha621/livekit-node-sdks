@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
+import configStyles from '../styles/AgentConfig.module.css';
 
 interface Agent {
   agent_id: number;
@@ -170,46 +171,44 @@ export default function AgentConfig() {
       </Head>
 
       <main className={styles.main}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '1200px' }}>
+        <div className={configStyles.backLink}>
+          <Link href="/">
+            <a className={configStyles.backLinkAnchor}>← Home</a>
+          </Link>
+        </div>
+        <div className={configStyles.header}>
           <h1 className={styles.title}>Agent Configuration</h1>
-          <div>
+          <div className={configStyles.navLinks}>
             <Link href="/agent-builder">
-              <a style={{ marginRight: '1rem', color: '#0070f3' }}>Agent Builder</a>
+              <a className={configStyles.navLink}>Agent Builder</a>
             </Link>
             <Link href="/admin-users">
-              <a style={{ marginRight: '1rem', color: '#0070f3' }}>Admin Users</a>
+              <a className={configStyles.navLink}>Admin Users</a>
             </Link>
             <Link href="/change-password">
-              <a style={{ marginRight: '1rem', color: '#0070f3' }}>Change Password</a>
+              <a className={configStyles.navLink}>Change Password</a>
             </Link>
             <Link href="/livekit-admin">
-              <a style={{ marginRight: '1rem', color: '#0070f3' }}>LiveKit Admin</a>
+              <a className={configStyles.navLink}>LiveKit Admin</a>
             </Link>
-            <button onClick={handleLogout} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
+            <button onClick={handleLogout} className={configStyles.logoutButton}>
               Logout
             </button>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', width: '100%', maxWidth: '1200px', marginTop: '2rem' }}>
+        <div className={configStyles.threeColumnLayout}>
           {/* Agents List */}
-          <div style={{ flex: 1, border: '1px solid #eaeaea', borderRadius: '10px', padding: '1rem' }}>
-            <h2 style={{ marginTop: 0 }}>Agents</h2>
+          <div className={configStyles.panel}>
+            <h2>Agents</h2>
             {agents.map((agent) => (
               <div
                 key={agent.agent_id}
                 onClick={() => handleAgentSelect(agent)}
-                style={{
-                  padding: '0.75rem',
-                  marginBottom: '0.5rem',
-                  cursor: 'pointer',
-                  backgroundColor: selectedAgent?.agent_id === agent.agent_id ? '#e6f7ff' : '#fafafa',
-                  border: '1px solid #d9d9d9',
-                  borderRadius: '4px',
-                }}
+                className={`${configStyles.listItem} ${selectedAgent?.agent_id === agent.agent_id ? configStyles.listItemSelected : ''}`}
               >
-                <strong>{agent.display_name}</strong>
-                <div style={{ fontSize: '0.875rem', color: '#666' }}>
+                <strong className={configStyles.listItemTitle}>{agent.display_name}</strong>
+                <div className={configStyles.listItemSubtitle}>
                   {agent.agent_name} ({agent.agent_type})
                 </div>
               </div>
@@ -217,58 +216,51 @@ export default function AgentConfig() {
           </div>
 
           {/* Capabilities List */}
-          <div style={{ flex: 1, border: '1px solid #eaeaea', borderRadius: '10px', padding: '1rem' }}>
-            <h2 style={{ marginTop: 0 }}>Capabilities</h2>
+          <div className={configStyles.panel}>
+            <h2>Capabilities</h2>
             {selectedAgent ? (
               capabilities.length > 0 ? (
                 capabilities.map((cap) => (
                   <div
                     key={cap.capability_id}
                     onClick={() => handleCapabilitySelect(cap)}
-                    style={{
-                      padding: '0.75rem',
-                      marginBottom: '0.5rem',
-                      cursor: 'pointer',
-                      backgroundColor: selectedCapability?.capability_id === cap.capability_id ? '#e6f7ff' : '#fafafa',
-                      border: '1px solid #d9d9d9',
-                      borderRadius: '4px',
-                    }}
+                    className={`${configStyles.listItem} ${selectedCapability?.capability_id === cap.capability_id ? configStyles.listItemSelected : ''}`}
                   >
-                    <strong>{cap.capability_name}</strong>
-                    <div style={{ fontSize: '0.875rem', color: '#666' }}>
+                    <strong className={configStyles.listItemTitle}>{cap.capability_name}</strong>
+                    <div className={configStyles.listItemSubtitle}>
                       {cap.interface_name} • {cap.capability_category}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: cap.is_enabled ? 'green' : 'red' }}>
+                    <div className={`${configStyles.listItemStatus} ${cap.is_enabled ? configStyles.listItemStatusEnabled : configStyles.listItemStatusDisabled}`}>
                       {cap.is_enabled ? 'Enabled' : 'Disabled'} (Priority: {cap.priority})
                     </div>
                   </div>
                 ))
               ) : (
-                <p style={{ color: '#666' }}>No capabilities found</p>
+                <p className={configStyles.emptyMessage}>No capabilities found</p>
               )
             ) : (
-              <p style={{ color: '#666' }}>Select an agent</p>
+              <p className={configStyles.emptyMessage}>Select an agent</p>
             )}
           </div>
 
           {/* Parameters */}
-          <div style={{ flex: 1, border: '1px solid #eaeaea', borderRadius: '10px', padding: '1rem' }}>
-            <h2 style={{ marginTop: 0 }}>Parameters</h2>
+          <div className={configStyles.panel}>
+            <h2>Parameters</h2>
             {selectedCapability ? (
               parameters.length > 0 ? (
                 <>
                   {parameters.map((param, index) => (
-                    <div key={param.parameter_key} style={{ marginBottom: '1rem' }}>
-                      <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                    <div key={param.parameter_key} className={configStyles.parameterField}>
+                      <label className={configStyles.parameterLabel}>
                         {param.parameter_key}
                         {param.config_source === 'agent_override' && (
-                          <span style={{ color: '#0070f3', fontSize: '0.75rem', marginLeft: '0.5rem' }}>
+                          <span className={configStyles.overrideBadge}>
                             (Override)
                           </span>
                         )}
                       </label>
                       {param.description && (
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem' }}>
+                        <div className={configStyles.parameterDescription}>
                           {param.description}
                         </div>
                       )}
@@ -276,14 +268,9 @@ export default function AgentConfig() {
                         type="text"
                         value={param.parameter_value}
                         onChange={(e) => handleParameterChange(index, e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          border: '1px solid #d9d9d9',
-                          borderRadius: '4px',
-                        }}
+                        className={configStyles.parameterInput}
                       />
-                      <div style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.25rem' }}>
+                      <div className={configStyles.parameterType}>
                         Type: {param.parameter_type}
                       </div>
                     </div>
@@ -291,35 +278,21 @@ export default function AgentConfig() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      backgroundColor: saving ? '#ccc' : '#0070f3',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: saving ? 'not-allowed' : 'pointer',
-                      marginTop: '1rem',
-                    }}
+                    className={configStyles.saveButton}
                   >
                     {saving ? 'Saving...' : 'Save Configuration'}
                   </button>
                   {message && (
-                    <div style={{ 
-                      marginTop: '1rem', 
-                      padding: '0.75rem',
-                      backgroundColor: message.includes('success') ? '#d4edda' : '#f8d7da',
-                      color: message.includes('success') ? '#155724' : '#721c24',
-                      borderRadius: '4px',
-                    }}>
+                    <div className={`${configStyles.message} ${message.includes('success') ? configStyles.messageSuccess : configStyles.messageError}`}>
                       {message}
                     </div>
                   )}
                 </>
               ) : (
-                <p style={{ color: '#666' }}>No parameters found</p>
+                <p className={configStyles.emptyMessage}>No parameters found</p>
               )
             ) : (
-              <p style={{ color: '#666' }}>Select a capability</p>
+              <p className={configStyles.emptyMessage}>Select a capability</p>
             )}
           </div>
         </div>

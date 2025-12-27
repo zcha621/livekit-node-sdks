@@ -1,7 +1,9 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Link from 'next/link';
 import styles from '../styles/Home.module.css';
+import loginStyles from '../styles/Login.module.css';
 
 export default function Login() {
   const router = useRouter();
@@ -46,6 +48,11 @@ export default function Login() {
       </Head>
 
       <main className={styles.main}>
+        <div className={loginStyles.backLink}>
+          <Link href="/">
+            <a className={loginStyles.backLinkAnchor}>← Home</a>
+          </Link>
+        </div>
         <h1 className={styles.title}>
           Admin Login
         </h1>
@@ -54,10 +61,10 @@ export default function Login() {
           Sign in to manage agents and LiveKit configuration
         </p>
 
-        <div className={styles.card} style={{ maxWidth: '400px', width: '100%' }}>
-          <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label htmlFor="username" style={{ display: 'block', marginBottom: '0.5rem' }}>
+        <div className={`${styles.card} ${loginStyles.loginCard}`}>
+          <form onSubmit={handleSubmit}>
+            <div className={loginStyles.formGroup}>
+              <label htmlFor="username" className={loginStyles.formLabel}>
                 Username
               </label>
               <input
@@ -66,18 +73,12 @@ export default function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  fontSize: '1rem',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                }}
+                className={loginStyles.formInput}
               />
             </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem' }}>
+            <div className={loginStyles.formGroup}>
+              <label htmlFor="password" className={loginStyles.formLabel}>
                 Password
               </label>
               <input
@@ -86,24 +87,12 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  fontSize: '1rem',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                }}
+                className={loginStyles.formInput}
               />
             </div>
 
             {error && (
-              <div style={{ 
-                color: 'red', 
-                marginBottom: '1rem',
-                padding: '0.5rem',
-                backgroundColor: '#fee',
-                borderRadius: '4px',
-              }}>
+              <div className={loginStyles.errorMessage}>
                 {error}
               </div>
             )}
@@ -111,16 +100,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                backgroundColor: loading ? '#ccc' : '#0070f3',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-              }}
+              className={loginStyles.submitButton}
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
