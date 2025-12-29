@@ -21,18 +21,18 @@ export interface AgentBuilderViewModel {
   
   // Create Agent form state
   agentName: string;
-  agentType: string;
+  agentType: number;
   agentUUID: string;
+  agentDisplayName: string;
   agentDescription: string;
-  agentEndpoint: string;
-  agentStatus: string;
-  agentVersion: string;
+  agentPrefabPath: string;
+  agentSceneName: string;
   
   // Create Capability form state
   capabilityName: string;
+  capabilityInterfaceName: string;
+  capabilityImplementationClass: string;
   capabilityDescription: string;
-  capabilityInputSchema: string;
-  capabilityOutputSchema: string;
   capabilityCategory: string;
   
   // Link Capabilities form state
@@ -47,18 +47,18 @@ export interface AgentBuilderViewModel {
   
   // Actions
   updateAgentName: (value: string) => void;
-  updateAgentType: (value: string) => void;
+  updateAgentType: (value: number) => void;
   regenerateAgentUUID: () => void;
+  updateAgentDisplayName: (value: string) => void;
   updateAgentDescription: (value: string) => void;
-  updateAgentEndpoint: (value: string) => void;
-  updateAgentStatus: (value: string) => void;
-  updateAgentVersion: (value: string) => void;
+  updateAgentPrefabPath: (value: string) => void;
+  updateAgentSceneName: (value: string) => void;
   createAgent: () => Promise<void>;
   
   updateCapabilityName: (value: string) => void;
+  updateCapabilityInterfaceName: (value: string) => void;
+  updateCapabilityImplementationClass: (value: string) => void;
   updateCapabilityDescription: (value: string) => void;
-  updateCapabilityInputSchema: (value: string) => void;
-  updateCapabilityOutputSchema: (value: string) => void;
   updateCapabilityCategory: (value: string) => void;
   createCapability: () => Promise<void>;
   
@@ -83,19 +83,19 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
   
   // Create Agent form state
   const [agentName, setAgentName] = useState('');
-  const [agentType, setAgentType] = useState('');
+  const [agentType, setAgentType] = useState(0);
   const [agentUUID, setAgentUUID] = useState(uuidv4());
+  const [agentDisplayName, setAgentDisplayName] = useState('');
   const [agentDescription, setAgentDescription] = useState('');
-  const [agentEndpoint, setAgentEndpoint] = useState('');
-  const [agentStatus, setAgentStatus] = useState('active');
-  const [agentVersion, setAgentVersion] = useState('1.0');
+  const [agentPrefabPath, setAgentPrefabPath] = useState('');
+  const [agentSceneName, setAgentSceneName] = useState('');
   
   // Create Capability form state
   const [capabilityName, setCapabilityName] = useState('');
+  const [capabilityInterfaceName, setCapabilityInterfaceName] = useState('');
+  const [capabilityImplementationClass, setCapabilityImplementationClass] = useState('');
   const [capabilityDescription, setCapabilityDescription] = useState('');
-  const [capabilityInputSchema, setCapabilityInputSchema] = useState('');
-  const [capabilityOutputSchema, setCapabilityOutputSchema] = useState('');
-  const [capabilityCategory, setCapabilityCategory] = useState('');
+  const [capabilityCategory, setCapabilityCategory] = useState('custom');
   
   // Link Capabilities form state
   const [selectedAgent, setSelectedAgent] = useState('');
@@ -130,7 +130,7 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
       // Initialize priorities for all capabilities
       const initialPriorities: { [key: string]: number } = {};
       capsData.forEach((cap, index) => {
-        initialPriorities[cap.id] = index + 1;
+        initialPriorities[cap.capability_id.toString()] = index + 1;
       });
       setCapabilityPriorities(initialPriorities);
       
@@ -143,12 +143,12 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
   
   // Create Agent form actions
   const updateAgentName = useCallback((value: string) => setAgentName(value), []);
-  const updateAgentType = useCallback((value: string) => setAgentType(value), []);
+  const updateAgentType = useCallback((value: number) => setAgentType(value), []);
   const regenerateAgentUUID = useCallback(() => setAgentUUID(uuidv4()), []);
+  const updateAgentDisplayName = useCallback((value: string) => setAgentDisplayName(value), []);
   const updateAgentDescription = useCallback((value: string) => setAgentDescription(value), []);
-  const updateAgentEndpoint = useCallback((value: string) => setAgentEndpoint(value), []);
-  const updateAgentStatus = useCallback((value: string) => setAgentStatus(value), []);
-  const updateAgentVersion = useCallback((value: string) => setAgentVersion(value), []);
+  const updateAgentPrefabPath = useCallback((value: string) => setAgentPrefabPath(value), []);
+  const updateAgentSceneName = useCallback((value: string) => setAgentSceneName(value), []);
   
   const createAgent = useCallback(async () => {
     if (!agentName || !agentType) {
@@ -161,13 +161,13 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
       setMessage('');
       
       const agentData: CreateAgentRequest = {
-        name: agentName,
-        type: agentType,
-        agentUUID,
+        agent_uuid: agentUUID,
+        agent_name: agentName,
+        agent_type_id: agentType,
+        display_name: agentDisplayName || agentName,
         description: agentDescription,
-        endpoint: agentEndpoint,
-        status: agentStatus,
-        version: agentVersion,
+        prefab_path: agentPrefabPath,
+        scene_name: agentSceneName,
       };
       
       await BuilderService.createAgent(agentData);
@@ -176,12 +176,12 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
       
       // Reset form
       setAgentName('');
-      setAgentType('');
+      setAgentType(agentTypes[0]?.type_id || 0);
       setAgentUUID(uuidv4());
+      setAgentDisplayName('');
       setAgentDescription('');
-      setAgentEndpoint('');
-      setAgentStatus('active');
-      setAgentVersion('1.0');
+      setAgentPrefabPath('');
+      setAgentSceneName('');
       
       // Reload agents list
       const agentsData = await BuilderService.getAgents();
@@ -192,18 +192,18 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
     } finally {
       setSaving(false);
     }
-  }, [agentName, agentType, agentUUID, agentDescription, agentEndpoint, agentStatus, agentVersion]);
+  }, [agentName, agentType, agentUUID, agentDisplayName, agentDescription, agentPrefabPath, agentSceneName, agentTypes]);
   
   // Create Capability form actions
   const updateCapabilityName = useCallback((value: string) => setCapabilityName(value), []);
+  const updateCapabilityInterfaceName = useCallback((value: string) => setCapabilityInterfaceName(value), []);
+  const updateCapabilityImplementationClass = useCallback((value: string) => setCapabilityImplementationClass(value), []);
   const updateCapabilityDescription = useCallback((value: string) => setCapabilityDescription(value), []);
-  const updateCapabilityInputSchema = useCallback((value: string) => setCapabilityInputSchema(value), []);
-  const updateCapabilityOutputSchema = useCallback((value: string) => setCapabilityOutputSchema(value), []);
   const updateCapabilityCategory = useCallback((value: string) => setCapabilityCategory(value), []);
   
   const createCapability = useCallback(async () => {
-    if (!capabilityName) {
-      setMessage('Capability name is required');
+    if (!capabilityName || !capabilityInterfaceName) {
+      setMessage('Capability name and interface name are required');
       return;
     }
     
@@ -212,11 +212,11 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
       setMessage('');
       
       const capabilityData: CreateCapabilityRequest = {
-        name: capabilityName,
+        capability_name: capabilityName,
+        interface_name: capabilityInterfaceName,
+        implementation_class: capabilityImplementationClass,
         description: capabilityDescription,
-        inputSchema: capabilityInputSchema,
-        outputSchema: capabilityOutputSchema,
-        category: capabilityCategory,
+        capability_category: capabilityCategory,
       };
       
       await BuilderService.createCapability(capabilityData);
@@ -225,10 +225,10 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
       
       // Reset form
       setCapabilityName('');
+      setCapabilityInterfaceName('');
+      setCapabilityImplementationClass('');
       setCapabilityDescription('');
-      setCapabilityInputSchema('');
-      setCapabilityOutputSchema('');
-      setCapabilityCategory('');
+      setCapabilityCategory('custom');
       
       // Reload capabilities list
       const capsData = await BuilderService.getCapabilities();
@@ -237,7 +237,7 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
       // Update priorities
       const initialPriorities: { [key: string]: number } = {};
       capsData.forEach((cap, index) => {
-        initialPriorities[cap.id] = index + 1;
+        initialPriorities[cap.capability_id.toString()] = index + 1;
       });
       setCapabilityPriorities(initialPriorities);
       
@@ -246,7 +246,7 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
     } finally {
       setSaving(false);
     }
-  }, [capabilityName, capabilityDescription, capabilityInputSchema, capabilityOutputSchema, capabilityCategory]);
+  }, [capabilityName, capabilityInterfaceName, capabilityImplementationClass, capabilityDescription, capabilityCategory]);
   
   // Link Capabilities form actions
   const updateSelectedAgent = useCallback((value: string) => setSelectedAgent(value), []);
@@ -317,14 +317,14 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
     agentName,
     agentType,
     agentUUID,
+    agentDisplayName,
     agentDescription,
-    agentEndpoint,
-    agentStatus,
-    agentVersion,
+    agentPrefabPath,
+    agentSceneName,
     capabilityName,
+    capabilityInterfaceName,
+    capabilityImplementationClass,
     capabilityDescription,
-    capabilityInputSchema,
-    capabilityOutputSchema,
     capabilityCategory,
     selectedAgent,
     selectedCapabilities,
@@ -335,15 +335,15 @@ export const useAgentBuilderViewModel = (): AgentBuilderViewModel => {
     updateAgentName,
     updateAgentType,
     regenerateAgentUUID,
+    updateAgentDisplayName,
     updateAgentDescription,
-    updateAgentEndpoint,
-    updateAgentStatus,
-    updateAgentVersion,
+    updateAgentPrefabPath,
+    updateAgentSceneName,
     createAgent,
     updateCapabilityName,
+    updateCapabilityInterfaceName,
+    updateCapabilityImplementationClass,
     updateCapabilityDescription,
-    updateCapabilityInputSchema,
-    updateCapabilityOutputSchema,
     updateCapabilityCategory,
     createCapability,
     updateSelectedAgent,

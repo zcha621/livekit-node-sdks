@@ -5,38 +5,51 @@
  */
 
 export interface AgentType {
-  id: string;
-  name: string;
+  type_id: number;
+  type_name: string;
+  type_description: string;
+  base_class: string;
 }
 
 export interface Capability {
-  id: string;
-  name: string;
+  capability_id: number;
+  capability_name: string;
+  interface_name: string;
+  implementation_class?: string;
   description: string;
+  capability_category: string;
+  is_active: boolean;
 }
 
 export interface Agent {
-  id: string;
-  name: string;
-  type: string;
+  agent_id: number;
+  agent_uuid: string;
+  agent_name: string;
+  agent_type_id: number;
+  display_name: string;
+  description?: string;
+  prefab_path?: string;
+  scene_name?: string;
+  is_active: boolean;
 }
 
 export interface CreateAgentRequest {
-  name: string;
-  type: string;
-  agentUUID: string;
-  description: string;
-  endpoint: string;
-  status: string;
-  version: string;
+  agent_uuid: string;
+  agent_name: string;
+  agent_type_id: number;
+  display_name?: string;
+  description?: string;
+  prefab_path?: string;
+  scene_name?: string;
+  metadata?: any;
 }
 
 export interface CreateCapabilityRequest {
-  name: string;
-  description: string;
-  inputSchema: string;
-  outputSchema: string;
-  category: string;
+  capability_name: string;
+  interface_name: string;
+  implementation_class?: string;
+  description?: string;
+  capability_category?: string;
 }
 
 export interface LinkCapabilitiesRequest {
@@ -51,7 +64,7 @@ export class BuilderService {
    */
   static async getAgentTypes(): Promise<AgentType[]> {
     try {
-      const response = await fetch('/api/agent-types');
+      const response = await fetch('/api/agent-types/list');
       if (!response.ok) {
         throw new Error(`Failed to fetch agent types: ${response.statusText}`);
       }
@@ -81,7 +94,7 @@ export class BuilderService {
    */
   static async getAgents(): Promise<Agent[]> {
     try {
-      const response = await fetch('/api/agents');
+      const response = await fetch('/api/agents/list');
       if (!response.ok) {
         throw new Error(`Failed to fetch agents: ${response.statusText}`);
       }
@@ -96,14 +109,15 @@ export class BuilderService {
    */
   static async createAgent(agentData: CreateAgentRequest): Promise<void> {
     try {
-      const response = await fetch('/api/create-agent', {
+      const response = await fetch('/api/agents/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(agentData),
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to create agent: ${response.statusText}`);
+        const data = await response.json();
+        throw new Error(data.message || `Failed to create agent: ${response.statusText}`);
       }
     } catch (error) {
       throw new Error(`Error creating agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -115,14 +129,15 @@ export class BuilderService {
    */
   static async createCapability(capabilityData: CreateCapabilityRequest): Promise<void> {
     try {
-      const response = await fetch('/api/create-capability', {
+      const response = await fetch('/api/capabilities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(capabilityData),
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to create capability: ${response.statusText}`);
+        const data = await response.json();
+        throw new Error(data.message || `Failed to create capability: ${response.statusText}`);
       }
     } catch (error) {
       throw new Error(`Error creating capability: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -134,14 +149,29 @@ export class BuilderService {
    */
   static async linkCapabilities(linkData: LinkCapabilitiesRequest): Promise<void> {
     try {
-      const response = await fetch('/api/link-capabilities', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(linkData),
-      });
+      const errors: string[] = [];
       
-      if (!response.ok) {
-        throw new Error(`Failed to link capabilities: ${response.statusText}`);
+      // Link each capability individually
+      for (const capabilityId of linkData.capabilityIds) {
+        const response = await fetch('/api/agent-capabilities/link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            agent_id: parseInt(linkData.agentId),
+            capability_id: parseInt(capabilityId),
+            is_enabled: true,
+            priority: linkData.priorities[capabilityId] || 1,
+          }),
+        });
+        
+        if (!response.ok) {
+          const data = await response.json();
+          errors.push(data.message || `Failed to link capability ${capabilityId}`);
+        }
+      }
+      
+      if (errors.length > 0) {
+        throw new Error(`Failed to link some capabilities: ${errors.join(', ')}`);
       }
     } catch (error) {
       throw new Error(`Error linking capabilities: ${error instanceof Error ? error.message : 'Unknown error'}`);

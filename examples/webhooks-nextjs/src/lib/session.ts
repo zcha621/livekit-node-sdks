@@ -1,9 +1,8 @@
-import { getIronSession, IronSessionOptions } from 'iron-session';
+import { getIronSession, SessionOptions } from 'iron-session';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
-import { cookies } from 'next/headers';
 
-export const sessionOptions: IronSessionOptions = {
+export const sessionOptions: SessionOptions = {
   password: process.env.SECRET_COOKIE_PASSWORD || 'complex_password_at_least_32_characters_long',
   cookieName: 'livekit_admin_session',
   cookieOptions: {

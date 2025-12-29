@@ -39,20 +39,20 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabCh
 interface CreateAgentFormProps {
   agentTypes: AgentType[];
   agentName: string;
-  agentType: string;
+  agentType: number;
   agentUUID: string;
+  agentDisplayName: string;
   agentDescription: string;
-  agentEndpoint: string;
-  agentStatus: string;
-  agentVersion: string;
+  agentPrefabPath: string;
+  agentSceneName: string;
   saving: boolean;
   onAgentNameChange: (value: string) => void;
-  onAgentTypeChange: (value: string) => void;
+  onAgentTypeChange: (value: number) => void;
   onRegenerateUUID: () => void;
+  onAgentDisplayNameChange: (value: string) => void;
   onAgentDescriptionChange: (value: string) => void;
-  onAgentEndpointChange: (value: string) => void;
-  onAgentStatusChange: (value: string) => void;
-  onAgentVersionChange: (value: string) => void;
+  onAgentPrefabPathChange: (value: string) => void;
+  onAgentSceneNameChange: (value: string) => void;
   onCreate: () => void;
 }
 
@@ -61,18 +61,18 @@ export const CreateAgentForm: React.FC<CreateAgentFormProps> = ({
   agentName,
   agentType,
   agentUUID,
+  agentDisplayName,
   agentDescription,
-  agentEndpoint,
-  agentStatus,
-  agentVersion,
+  agentPrefabPath,
+  agentSceneName,
   saving,
   onAgentNameChange,
   onAgentTypeChange,
   onRegenerateUUID,
+  onAgentDisplayNameChange,
   onAgentDescriptionChange,
-  onAgentEndpointChange,
-  onAgentStatusChange,
-  onAgentVersionChange,
+  onAgentPrefabPathChange,
+  onAgentSceneNameChange,
   onCreate,
 }) => (
   <div className={styles.formSection}>
@@ -84,17 +84,27 @@ export const CreateAgentForm: React.FC<CreateAgentFormProps> = ({
         type="text"
         value={agentName}
         onChange={(e) => onAgentNameChange(e.target.value)}
-        placeholder="Enter agent name"
+        placeholder="e.g., Agent_Nurse_002"
+      />
+    </div>
+    
+    <div className={styles.formGroup}>
+      <label>Display Name</label>
+      <input
+        type="text"
+        value={agentDisplayName}
+        onChange={(e) => onAgentDisplayNameChange(e.target.value)}
+        placeholder="e.g., Nurse Sarah"
       />
     </div>
     
     <div className={styles.formGroup}>
       <label>Agent Type *</label>
-      <select value={agentType} onChange={(e) => onAgentTypeChange(e.target.value)}>
-        <option value="">Select type</option>
+      <select value={agentType} onChange={(e) => onAgentTypeChange(parseInt(e.target.value))}>
+        <option value="0">Select type</option>
         {agentTypes.map((type) => (
-          <option key={type.id} value={type.id}>
-            {type.name}
+          <option key={type.type_id} value={type.type_id}>
+            {type.type_name} - {type.type_description}
           </option>
         ))}
       </select>
@@ -104,7 +114,7 @@ export const CreateAgentForm: React.FC<CreateAgentFormProps> = ({
       <label>Agent UUID</label>
       <div className={styles.uuidContainer}>
         <input type="text" value={agentUUID} readOnly />
-        <button onClick={onRegenerateUUID} className={styles.regenerateBtn}>
+        <button onClick={onRegenerateUUID} className={styles.regenerateBtn} type="button">
           Regenerate
         </button>
       </div>
@@ -121,31 +131,22 @@ export const CreateAgentForm: React.FC<CreateAgentFormProps> = ({
     </div>
     
     <div className={styles.formGroup}>
-      <label>Endpoint URL</label>
+      <label>Unity Prefab Path</label>
       <input
         type="text"
-        value={agentEndpoint}
-        onChange={(e) => onAgentEndpointChange(e.target.value)}
-        placeholder="https://example.com/agent"
+        value={agentPrefabPath}
+        onChange={(e) => onAgentPrefabPathChange(e.target.value)}
+        placeholder="e.g., Assets/Prefabs/Agents/NurseAgent.prefab"
       />
     </div>
     
     <div className={styles.formGroup}>
-      <label>Status</label>
-      <select value={agentStatus} onChange={(e) => onAgentStatusChange(e.target.value)}>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-        <option value="maintenance">Maintenance</option>
-      </select>
-    </div>
-    
-    <div className={styles.formGroup}>
-      <label>Version</label>
+      <label>Scene Name</label>
       <input
         type="text"
-        value={agentVersion}
-        onChange={(e) => onAgentVersionChange(e.target.value)}
-        placeholder="1.0"
+        value={agentSceneName}
+        onChange={(e) => onAgentSceneNameChange(e.target.value)}
+        placeholder="e.g., GynecologicalClinic"
       />
     </div>
     
@@ -157,30 +158,30 @@ export const CreateAgentForm: React.FC<CreateAgentFormProps> = ({
 
 interface CreateCapabilityFormProps {
   capabilityName: string;
+  capabilityInterfaceName: string;
+  capabilityImplementationClass: string;
   capabilityDescription: string;
-  capabilityInputSchema: string;
-  capabilityOutputSchema: string;
   capabilityCategory: string;
   saving: boolean;
   onCapabilityNameChange: (value: string) => void;
+  onCapabilityInterfaceNameChange: (value: string) => void;
+  onCapabilityImplementationClassChange: (value: string) => void;
   onCapabilityDescriptionChange: (value: string) => void;
-  onCapabilityInputSchemaChange: (value: string) => void;
-  onCapabilityOutputSchemaChange: (value: string) => void;
   onCapabilityCategoryChange: (value: string) => void;
   onCreate: () => void;
 }
 
 export const CreateCapabilityForm: React.FC<CreateCapabilityFormProps> = ({
   capabilityName,
+  capabilityInterfaceName,
+  capabilityImplementationClass,
   capabilityDescription,
-  capabilityInputSchema,
-  capabilityOutputSchema,
   capabilityCategory,
   saving,
   onCapabilityNameChange,
+  onCapabilityInterfaceNameChange,
+  onCapabilityImplementationClassChange,
   onCapabilityDescriptionChange,
-  onCapabilityInputSchemaChange,
-  onCapabilityOutputSchemaChange,
   onCapabilityCategoryChange,
   onCreate,
 }) => (
@@ -193,7 +194,27 @@ export const CreateCapabilityForm: React.FC<CreateCapabilityFormProps> = ({
         type="text"
         value={capabilityName}
         onChange={(e) => onCapabilityNameChange(e.target.value)}
-        placeholder="Enter capability name"
+        placeholder="e.g., Conversation"
+      />
+    </div>
+    
+    <div className={styles.formGroup}>
+      <label>Interface Name *</label>
+      <input
+        type="text"
+        value={capabilityInterfaceName}
+        onChange={(e) => onCapabilityInterfaceNameChange(e.target.value)}
+        placeholder="e.g., IConversation"
+      />
+    </div>
+    
+    <div className={styles.formGroup}>
+      <label>Implementation Class</label>
+      <input
+        type="text"
+        value={capabilityImplementationClass}
+        onChange={(e) => onCapabilityImplementationClassChange(e.target.value)}
+        placeholder="e.g., ConvaiConversationalCapability"
       />
     </div>
     
@@ -208,33 +229,15 @@ export const CreateCapabilityForm: React.FC<CreateCapabilityFormProps> = ({
     </div>
     
     <div className={styles.formGroup}>
-      <label>Input Schema (JSON)</label>
-      <textarea
-        value={capabilityInputSchema}
-        onChange={(e) => onCapabilityInputSchemaChange(e.target.value)}
-        placeholder='{"type": "object", "properties": {}}'
-        rows={6}
-      />
-    </div>
-    
-    <div className={styles.formGroup}>
-      <label>Output Schema (JSON)</label>
-      <textarea
-        value={capabilityOutputSchema}
-        onChange={(e) => onCapabilityOutputSchemaChange(e.target.value)}
-        placeholder='{"type": "object", "properties": {}}'
-        rows={6}
-      />
-    </div>
-    
-    <div className={styles.formGroup}>
       <label>Category</label>
-      <input
-        type="text"
-        value={capabilityCategory}
-        onChange={(e) => onCapabilityCategoryChange(e.target.value)}
-        placeholder="e.g., Data Processing, Communication, etc."
-      />
+      <select value={capabilityCategory} onChange={(e) => onCapabilityCategoryChange(e.target.value)}>
+        <option value="custom">Custom</option>
+        <option value="communication">Communication</option>
+        <option value="perception">Perception</option>
+        <option value="movement">Movement</option>
+        <option value="interaction">Interaction</option>
+        <option value="behavior">Behavior</option>
+      </select>
     </div>
     
     <button onClick={onCreate} disabled={saving} className={styles.createBtn}>
@@ -276,8 +279,8 @@ export const LinkCapabilitiesForm: React.FC<LinkCapabilitiesFormProps> = ({
       <select value={selectedAgent} onChange={(e) => onSelectedAgentChange(e.target.value)}>
         <option value="">Select an agent</option>
         {agents.map((agent) => (
-          <option key={agent.id} value={agent.id}>
-            {agent.name} ({agent.type})
+          <option key={agent.agent_id} value={agent.agent_id}>
+            {agent.display_name || agent.agent_name} ({agent.agent_name})
           </option>
         ))}
       </select>
@@ -287,28 +290,31 @@ export const LinkCapabilitiesForm: React.FC<LinkCapabilitiesFormProps> = ({
       <label>Select Capabilities *</label>
       <div className={styles.capabilityList}>
         {capabilities.map((capability) => (
-          <div key={capability.id} className={styles.capabilityItem}>
+          <div key={capability.capability_id} className={styles.capabilityItem}>
             <div className={styles.capabilityCheckbox}>
               <input
                 type="checkbox"
-                id={`cap-${capability.id}`}
-                checked={selectedCapabilities.includes(capability.id)}
-                onChange={() => onToggleCapability(capability.id)}
+                id={`cap-${capability.capability_id}`}
+                checked={selectedCapabilities.includes(capability.capability_id.toString())}
+                onChange={() => onToggleCapability(capability.capability_id.toString())}
               />
-              <label htmlFor={`cap-${capability.id}`}>
-                <strong>{capability.name}</strong>
+              <label htmlFor={`cap-${capability.capability_id}`}>
+                <strong>{capability.capability_name}</strong>
                 <p>{capability.description}</p>
+                <p style={{ fontSize: '12px', color: '#888' }}>
+                  {capability.interface_name} • {capability.capability_category}
+                </p>
               </label>
             </div>
             
-            {selectedCapabilities.includes(capability.id) && (
+            {selectedCapabilities.includes(capability.capability_id.toString()) && (
               <div className={styles.priorityInput}>
                 <label>Priority:</label>
                 <input
                   type="number"
                   min="1"
-                  value={capabilityPriorities[capability.id] || 1}
-                  onChange={(e) => onCapabilityPriorityChange(capability.id, parseInt(e.target.value) || 1)}
+                  value={capabilityPriorities[capability.capability_id.toString()] || 1}
+                  onChange={(e) => onCapabilityPriorityChange(capability.capability_id.toString(), parseInt(e.target.value) || 1)}
                 />
               </div>
             )}

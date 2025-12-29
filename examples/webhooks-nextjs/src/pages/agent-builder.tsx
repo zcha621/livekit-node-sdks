@@ -63,18 +63,18 @@ export default function AgentBuilder() {
               agentName={vm.agentName}
               agentType={vm.agentType}
               agentUUID={vm.agentUUID}
+              agentDisplayName={vm.agentDisplayName}
               agentDescription={vm.agentDescription}
-              agentEndpoint={vm.agentEndpoint}
-              agentStatus={vm.agentStatus}
-              agentVersion={vm.agentVersion}
+              agentPrefabPath={vm.agentPrefabPath}
+              agentSceneName={vm.agentSceneName}
               saving={vm.saving}
               onAgentNameChange={vm.updateAgentName}
               onAgentTypeChange={vm.updateAgentType}
               onRegenerateUUID={vm.regenerateAgentUUID}
+              onAgentDisplayNameChange={vm.updateAgentDisplayName}
               onAgentDescriptionChange={vm.updateAgentDescription}
-              onAgentEndpointChange={vm.updateAgentEndpoint}
-              onAgentStatusChange={vm.updateAgentStatus}
-              onAgentVersionChange={vm.updateAgentVersion}
+              onAgentPrefabPathChange={vm.updateAgentPrefabPath}
+              onAgentSceneNameChange={vm.updateAgentSceneName}
               onCreate={vm.createAgent}
             />
           )}
@@ -82,15 +82,15 @@ export default function AgentBuilder() {
           {vm.activeTab === 1 && (
             <CreateCapabilityForm
               capabilityName={vm.capabilityName}
+              capabilityInterfaceName={vm.capabilityInterfaceName}
+              capabilityImplementationClass={vm.capabilityImplementationClass}
               capabilityDescription={vm.capabilityDescription}
-              capabilityInputSchema={vm.capabilityInputSchema}
-              capabilityOutputSchema={vm.capabilityOutputSchema}
               capabilityCategory={vm.capabilityCategory}
               saving={vm.saving}
               onCapabilityNameChange={vm.updateCapabilityName}
+              onCapabilityInterfaceNameChange={vm.updateCapabilityInterfaceName}
+              onCapabilityImplementationClassChange={vm.updateCapabilityImplementationClass}
               onCapabilityDescriptionChange={vm.updateCapabilityDescription}
-              onCapabilityInputSchemaChange={vm.updateCapabilityInputSchema}
-              onCapabilityOutputSchemaChange={vm.updateCapabilityOutputSchema}
               onCapabilityCategoryChange={vm.updateCapabilityCategory}
               onCreate={vm.createCapability}
             />
