@@ -46,6 +46,7 @@ export default function AdminUsers() {
           <CreateUserForm
             newUser={vm.newUser}
             onFieldChange={vm.updateNewUserField}
+            onTogglePermission={vm.togglePermission}
             onCreate={vm.createUser}
             onCancel={() => vm.setShowCreateForm(false)}
           />

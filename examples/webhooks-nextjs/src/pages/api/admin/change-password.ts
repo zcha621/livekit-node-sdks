@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { withSessionRoute } from '../../../lib/session';
-import { query } from '../../../lib/db';
+import { queryUserDb } from '../../../lib/userDb';
 
 interface AdminUser {
-  admin_id: number;
+  user_id: number;
   password_hash: string;
 }
 
@@ -18,10 +18,10 @@ async function changePasswordRoute(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { current_password, new_password, admin_id } = req.body;
+  const { current_password, new_password, user_id } = req.body;
 
   // Allow admin to change their own password or another user's password
-  const targetAdminId = admin_id || req.session.user.id;
+  const targetUserId = user_id || req.session.user.id;
 
   if (!new_password) {
     return res.status(400).json({ message: 'New password is required' });
@@ -33,15 +33,15 @@ async function changePasswordRoute(req: NextApiRequest, res: NextApiResponse) {
 
   try {
     // If changing own password, verify current password
-    if (targetAdminId === req.session.user.id) {
+    if (targetUserId === req.session.user.id) {
       if (!current_password) {
         return res.status(400).json({ message: 'Current password is required' });
       }
 
       // Fetch current password hash
-      const users = await query<AdminUser[]>(
-        'SELECT admin_id, password_hash FROM admin_users WHERE admin_id = ?',
-        [targetAdminId]
+      const users = await queryUserDb<AdminUser[]>(
+        'SELECT user_id, password_hash FROM admin_users WHERE user_id = ?',
+        [targetUserId]
       );
 
       if (users.length === 0) {
@@ -60,9 +60,9 @@ async function changePasswordRoute(req: NextApiRequest, res: NextApiResponse) {
     const new_password_hash = await bcrypt.hash(new_password, 10);
 
     // Update password
-    await query(
-      'UPDATE admin_users SET password_hash = ? WHERE admin_id = ?',
-      [new_password_hash, targetAdminId]
+    await queryUserDb(
+      'UPDATE admin_users SET password_hash = ? WHERE user_id = ?',
+      [new_password_hash, targetUserId]
     );
 
     return res.status(200).json({

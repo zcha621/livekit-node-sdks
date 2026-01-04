@@ -19,9 +19,10 @@ interface AdminUsersViewModel {
   // Actions
   setShowCreateForm: (show: boolean) => void;
   updateNewUserField: (field: keyof CreateUserRequest, value: string) => void;
+  togglePermission: (permission: string) => void;
   createUser: () => Promise<void>;
-  toggleUserStatus: (adminId: number, currentStatus: boolean) => Promise<void>;
-  deleteUser: (adminId: number) => Promise<void>;
+  toggleUserStatus: (userId: number, currentStatus: boolean) => Promise<void>;
+  deleteUser: (userId: number) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -39,6 +40,8 @@ export function useAdminUsersViewModel(): AdminUsersViewModel {
     password: '',
     email: '',
     full_name: '',
+    user_type: 'normal',
+    permissions: [],
   });
 
   // Initialize: Check auth and load users
@@ -83,6 +86,20 @@ export function useAdminUsersViewModel(): AdminUsersViewModel {
     setNewUser(prev => ({ ...prev, [field]: value }));
   }, []);
 
+  // Public: Toggle permission
+  const togglePermission = useCallback((permission: string) => {
+    setNewUser(prev => {
+      const permissions = prev.permissions || [];
+      const hasPermission = permissions.includes(permission);
+      return {
+        ...prev,
+        permissions: hasPermission
+          ? permissions.filter(p => p !== permission)
+          : [...permissions, permission]
+      };
+    });
+  }, []);
+
   // Public: Create user
   const createUser = useCallback(async () => {
     if (!newUser.username || !newUser.password || !newUser.email || !newUser.full_name) {
@@ -99,7 +116,7 @@ export function useAdminUsersViewModel(): AdminUsersViewModel {
       await UserService.createUser(newUser);
       showMessage('User created successfully', 'success');
       setShowCreateForm(false);
-      setNewUser({ username: '', password: '', email: '', full_name: '' });
+      setNewUser({ username: '', password: '', email: '', full_name: '', user_type: 'normal', permissions: [] });
       await loadUsers();
     } catch (error) {
       showMessage(error instanceof Error ? error.message : 'Failed to create user', 'error');
@@ -107,9 +124,9 @@ export function useAdminUsersViewModel(): AdminUsersViewModel {
   }, [newUser]);
 
   // Public: Toggle user status
-  const toggleUserStatus = useCallback(async (adminId: number, currentStatus: boolean) => {
+  const toggleUserStatus = useCallback(async (userId: number, currentStatus: boolean) => {
     try {
-      await UserService.toggleUserStatus(adminId, !currentStatus);
+      await UserService.toggleUserStatus(userId, !currentStatus);
       showMessage(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully`, 'success');
       await loadUsers();
     } catch (error) {
@@ -118,13 +135,13 @@ export function useAdminUsersViewModel(): AdminUsersViewModel {
   }, []);
 
   // Public: Delete user
-  const deleteUser = useCallback(async (adminId: number) => {
+  const deleteUser = useCallback(async (userId: number) => {
     if (!confirm('Are you sure you want to delete this user?')) {
       return;
     }
 
     try {
-      await UserService.deleteUser(adminId);
+      await UserService.deleteUser(userId);
       showMessage('User deleted successfully', 'success');
       await loadUsers();
     } catch (error) {
@@ -147,6 +164,7 @@ export function useAdminUsersViewModel(): AdminUsersViewModel {
     newUser,
     setShowCreateForm,
     updateNewUserField,
+    togglePermission,
     createUser,
     toggleUserStatus,
     deleteUser,

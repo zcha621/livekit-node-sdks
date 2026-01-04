@@ -4,7 +4,7 @@
  */
 
 export interface AdminUser {
-  admin_id: number;
+  user_id: number;
   username: string;
   email: string;
   full_name: string;
@@ -18,6 +18,8 @@ export interface CreateUserRequest {
   password: string;
   email: string;
   full_name: string;
+  user_type: 'admin' | 'normal';
+  permissions?: string[];
 }
 
 export interface UpdateUserRequest {
@@ -57,11 +59,11 @@ export class UserService {
   /**
    * Update an existing admin user
    */
-  static async updateUser(adminId: number, userData: UpdateUserRequest): Promise<void> {
-    const response = await fetch(`/api/admin/users/${adminId}`, {
+  static async updateUser(userId: number, userData: UpdateUserRequest): Promise<void> {
+    const response = await fetch('/api/admin/users', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
+      body: JSON.stringify({ user_id: userId, ...userData }),
     });
 
     if (!response.ok) {
@@ -73,9 +75,11 @@ export class UserService {
   /**
    * Delete an admin user
    */
-  static async deleteUser(adminId: number): Promise<void> {
-    const response = await fetch(`/api/admin/users/${adminId}`, {
+  static async deleteUser(userId: number): Promise<void> {
+    const response = await fetch('/api/admin/users', {
       method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId }),
     });
 
     if (!response.ok) {
@@ -87,7 +91,7 @@ export class UserService {
   /**
    * Toggle user active status
    */
-  static async toggleUserStatus(adminId: number, isActive: boolean): Promise<void> {
-    await this.updateUser(adminId, { is_active: isActive });
+  static async toggleUserStatus(userId: number, isActive: boolean): Promise<void> {
+    await this.updateUser(userId, { is_active: isActive });
   }
 }

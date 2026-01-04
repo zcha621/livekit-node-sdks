@@ -59,6 +59,7 @@ export const MessageBanner: React.FC<MessageBannerProps> = ({ message, messageTy
 interface CreateUserFormProps {
   newUser: CreateUserRequest;
   onFieldChange: (field: keyof CreateUserRequest, value: string) => void;
+  onTogglePermission: (permission: string) => void;
   onCreate: () => void;
   onCancel: () => void;
 }
@@ -66,6 +67,7 @@ interface CreateUserFormProps {
 export const CreateUserForm: React.FC<CreateUserFormProps> = ({
   newUser,
   onFieldChange,
+  onTogglePermission,
   onCreate,
   onCancel,
 }) => (
@@ -111,6 +113,44 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
         placeholder="Enter full name"
       />
     </div>
+    <div className={adminStyles.formGroup}>
+      <label className={adminStyles.label}>User Type:</label>
+      <select
+        value={newUser.user_type}
+        onChange={(e) => onFieldChange('user_type', e.target.value)}
+        className={adminStyles.input}
+      >
+        <option value="normal">Normal User</option>
+        <option value="admin">Admin User</option>
+      </select>
+    </div>
+    {newUser.user_type === 'normal' && (
+      <div className={adminStyles.formGroup}>
+        <label className={adminStyles.label}>Permissions:</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+          {[
+            { value: 'agent_builder_create', label: 'Agent Builder - Create' },
+            { value: 'agent_builder_edit', label: 'Agent Builder - Edit' },
+            { value: 'agent_builder_delete', label: 'Agent Builder - Delete' },
+            { value: 'agent_config_edit', label: 'Agent Config - Edit' },
+            { value: 'livekit_token_create', label: 'LiveKit Token - Create' },
+            { value: 'livekit_room_manage', label: 'LiveKit Room - Manage' },
+            { value: 'video_conference_access', label: 'Video Conference - Access' },
+            { value: 'user_management', label: 'User Management' },
+          ].map((perm) => (
+            <label key={perm.value} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={newUser.permissions?.includes(perm.value) || false}
+                onChange={() => onTogglePermission(perm.value)}
+                style={{ marginRight: '8px' }}
+              />
+              <span>{perm.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    )}
     <div className={adminStyles.formActions}>
       <button onClick={onCreate} className={adminStyles.createButton}>
         Create User
@@ -124,8 +164,8 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
 
 interface UsersTableProps {
   users: AdminUser[];
-  onToggleStatus: (adminId: number, currentStatus: boolean) => void;
-  onDelete: (adminId: number) => void;
+  onToggleStatus: (userId: number, currentStatus: boolean) => void;
+  onDelete: (userId: number) => void;
 }
 
 export const UsersTable: React.FC<UsersTableProps> = ({ users, onToggleStatus, onDelete }) => (
@@ -145,8 +185,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({ users, onToggleStatus, o
       </thead>
       <tbody>
         {users.map((user) => (
-          <tr key={user.admin_id} className={!user.is_active ? adminStyles.inactiveRow : ''}>
-            <td>{user.admin_id}</td>
+          <tr key={user.user_id} className={!user.is_active ? adminStyles.inactiveRow : ''}>
+            <td>{user.user_id}</td>
             <td>{user.username}</td>
             <td>{user.email}</td>
             <td>{user.full_name}</td>
@@ -168,13 +208,13 @@ export const UsersTable: React.FC<UsersTableProps> = ({ users, onToggleStatus, o
             <td>
               <div className={adminStyles.actionButtons}>
                 <button
-                  onClick={() => onToggleStatus(user.admin_id, user.is_active)}
+                  onClick={() => onToggleStatus(user.user_id, user.is_active)}
                   className={adminStyles.toggleButton}
                 >
                   {user.is_active ? 'Deactivate' : 'Activate'}
                 </button>
                 <button
-                  onClick={() => onDelete(user.admin_id)}
+                  onClick={() => onDelete(user.user_id)}
                   className={adminStyles.deleteButton}
                 >
                   Delete

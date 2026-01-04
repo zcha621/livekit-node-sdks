@@ -1,15 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { withSessionRoute } from '../../../lib/session';
-import { query } from '../../../lib/db';
+import { queryUserDb } from '../../../lib/userDb';
 
 interface AdminUser {
-  admin_id: number;
+  user_id: number;
   username: string;
   password_hash: string;
   email: string;
   full_name: string;
+  user_type: 'admin' | 'normal';
   is_active: boolean;
+}
+
+interface UserPermission {
+  permission_name: string;
 }
 
 async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
@@ -24,9 +29,9 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
-    // Fetch user from database
-    const users = await query<AdminUser[]>(
-      'SELECT admin_id, username, password_hash, email, full_name, is_active FROM admin_users WHERE username = ? AND is_active = TRUE',
+    // Fetch user from USER MANAGEMENT database
+    const users = await queryUserDb<AdminUser[]>(
+      'SELECT user_id, username, password_hash, email, full_name, user_type, is_active FROM admin_users WHERE username = ? AND is_active = TRUE',
       [username]
     );
 
@@ -43,17 +48,30 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Fetch user permissions (only for normal users)
+    let permissions: string[] = [];
+    if (user.user_type === 'normal') {
+      const userPermissions = await queryUserDb<UserPermission[]>(
+        'SELECT permission_name FROM user_permissions WHERE user_id = ? AND permission_value = TRUE',
+        [user.user_id]
+      );
+      permissions = userPermissions.map(p => p.permission_name);
+    }
+
     // Update last login timestamp
-    await query(
-      'UPDATE admin_users SET last_login = NOW() WHERE admin_id = ?',
-      [user.admin_id]
+    await queryUserDb(
+      'UPDATE admin_users SET last_login = NOW() WHERE user_id = ?',
+      [user.user_id]
     );
 
     // Set session
     req.session.user = {
-      id: user.admin_id,
+      id: user.user_id,
       username: user.username,
-      isAdmin: true,
+      email: user.email,
+      fullName: user.full_name,
+      userType: user.user_type,
+      permissions: permissions,
     };
     await req.session.save();
 
@@ -63,7 +81,8 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
         username: user.username, 
         email: user.email,
         fullName: user.full_name,
-        isAdmin: true 
+        userType: user.user_type,
+        permissions: permissions
       } 
     });
   } catch (error) {

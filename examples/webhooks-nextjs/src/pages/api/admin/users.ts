@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { withSessionRoute } from '../../../lib/session';
-import { query } from '../../../lib/db';
+import { queryUserDb } from '../../../lib/userDb';
 
 interface AdminUser {
-  admin_id: number;
+  user_id: number;
   username: string;
   email: string;
   full_name: string;
@@ -22,9 +22,9 @@ async function adminUsersRoute(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     // List all admin users
     try {
-      const users = await query<AdminUser[]>(`
+      const users = await queryUserDb<AdminUser[]>(`
         SELECT 
-          admin_id,
+          user_id,
           username,
           email,
           full_name,
@@ -32,7 +32,8 @@ async function adminUsersRoute(req: NextApiRequest, res: NextApiResponse) {
           last_login,
           created_at
         FROM admin_users
-        ORDER BY created_at DESC
+        WHERE is_active = TRUE
+        ORDER BY user_id ASC
       `);
       return res.status(200).json(users);
     } catch (error) {
@@ -43,7 +44,7 @@ async function adminUsersRoute(req: NextApiRequest, res: NextApiResponse) {
 
   if (req.method === 'POST') {
     // Create new admin user
-    const { username, password, email, full_name } = req.body;
+    const { username, password, email, full_name, user_type, permissions } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -58,16 +59,29 @@ async function adminUsersRoute(req: NextApiRequest, res: NextApiResponse) {
       const password_hash = await bcrypt.hash(password, 10);
 
       // Insert new admin user
-      const result = await query<any>(
-        `INSERT INTO admin_users (username, password_hash, email, full_name) 
-         VALUES (?, ?, ?, ?)`,
-        [username, password_hash, email || null, full_name || null]
+      const result = await queryUserDb<any>(
+        `INSERT INTO admin_users (username, password_hash, email, full_name, user_type) 
+         VALUES (?, ?, ?, ?, ?)`,
+        [username, password_hash, email || null, full_name || null, user_type || 'normal']
       );
+
+      const newUserId = result.insertId;
+
+      // If user is normal and has permissions, grant them
+      if (user_type === 'normal' && permissions && Array.isArray(permissions) && permissions.length > 0) {
+        for (const permission of permissions) {
+          await queryUserDb(
+            `INSERT INTO user_permissions (user_id, permission_name, permission_value, granted_by)
+             VALUES (?, ?, TRUE, ?)`,
+            [newUserId, permission, req.session.user.id]
+          );
+        }
+      }
 
       return res.status(201).json({
         success: true,
         message: 'Admin user created successfully',
-        admin_id: result.insertId
+        user_id: newUserId
       });
     } catch (error: any) {
       console.error('Error creating admin user:', error);
@@ -83,18 +97,18 @@ async function adminUsersRoute(req: NextApiRequest, res: NextApiResponse) {
 
   if (req.method === 'PUT') {
     // Update admin user
-    const { admin_id, email, full_name, is_active } = req.body;
+    const { user_id, email, full_name, is_active } = req.body;
 
-    if (!admin_id) {
-      return res.status(400).json({ message: 'admin_id is required' });
+    if (!user_id) {
+      return res.status(400).json({ message: 'user_id is required' });
     }
 
     try {
-      await query(
+      await queryUserDb(
         `UPDATE admin_users 
          SET email = ?, full_name = ?, is_active = ?
-         WHERE admin_id = ?`,
-        [email || null, full_name || null, is_active !== undefined ? is_active : true, admin_id]
+         WHERE user_id = ?`,
+        [email || null, full_name || null, is_active !== undefined ? is_active : true, user_id]
       );
 
       return res.status(200).json({
@@ -109,22 +123,22 @@ async function adminUsersRoute(req: NextApiRequest, res: NextApiResponse) {
 
   if (req.method === 'DELETE') {
     // Delete/deactivate admin user
-    const { admin_id } = req.body;
+    const { user_id } = req.body;
 
-    if (!admin_id) {
-      return res.status(400).json({ message: 'admin_id is required' });
+    if (!user_id) {
+      return res.status(400).json({ message: 'user_id is required' });
     }
 
     // Prevent self-deletion
-    if (admin_id === req.session.user.id) {
+    if (user_id === req.session.user.id) {
       return res.status(400).json({ message: 'Cannot delete your own account' });
     }
 
     try {
       // Soft delete by setting is_active to false
-      await query(
-        'UPDATE admin_users SET is_active = FALSE WHERE admin_id = ?',
-        [admin_id]
+      await queryUserDb(
+        'UPDATE admin_users SET is_active = FALSE WHERE user_id = ?',
+        [user_id]
       );
 
       return res.status(200).json({

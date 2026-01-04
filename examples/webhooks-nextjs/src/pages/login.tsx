@@ -1,4 +1,5 @@
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -32,7 +33,7 @@ export default function Login() {
       } else {
         setError(data.message || 'Login failed');
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -105,6 +106,14 @@ export default function Login() {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
+
+          <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+            <Link href="/forgot-password">
+              <a style={{ color: '#0070f3', textDecoration: 'none', fontSize: '0.875rem' }}>
+                Forgot password?
+              </a>
+            </Link>
+          </div>
 
           <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem', color: '#666' }}>
             Default credentials: admin / admin123

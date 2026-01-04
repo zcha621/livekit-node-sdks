@@ -60,3 +60,105 @@
   border: 1px solid #f5c6cb;
   border-radius: 4px;
 }
+
+.successMessage {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+}
+
+.devMessage {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.devLink {
+  color: #0070f3;
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.loginBox {
+  max-width: 450px;
+  width: 100%;
+}
+
+.loginTitle {
+  margin-bottom: 0.5rem;
+}
+
+.loginSubtitle {
+  color: #666;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.loginForm {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+}
+
+.loginButton {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: #0070f3;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.loginButton:hover:not(:disabled) {
+  background-color: #0051bb;
+}
+
+.loginButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.loginFooter {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.link {
+  color: #0070f3;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
