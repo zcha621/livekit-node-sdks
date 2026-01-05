@@ -139,8 +139,8 @@ export default function ResetPassword() {
           </form>
 
           <div className={loginStyles.loginFooter}>
-            <Link href="/login">
-              <a className={loginStyles.link}>← Back to Login</a>
+            <Link href="/login" className={loginStyles.link}>
+              ← Back to Login
             </Link>
           </div>
         </div>

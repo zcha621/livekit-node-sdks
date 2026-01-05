@@ -78,59 +78,49 @@ const Home: NextPage<HomeProps> = ({ user }) => {
 
         <div className={styles.grid}>
           {/* Agent Configuration - View for all, Edit based on permissions */}
-          <Link href="/agent-config">
-            <a className={styles.card}>
-              <h2>Agent Configuration &rarr;</h2>
-              <p>
-                {canAccessAgentConfig ? 'Configure' : 'View'} agent capabilities and parameters
-              </p>
-              {!canAccessAgentConfig && (
-                <span style={{ fontSize: '0.75rem', color: '#999' }}>(View Only)</span>
-              )}
-            </a>
+          <Link href="/agent-config" className={styles.card}>
+            <h2>Agent Configuration &rarr;</h2>
+            <p>
+              {canAccessAgentConfig ? 'Configure' : 'View'} agent capabilities and parameters
+            </p>
+            {!canAccessAgentConfig && (
+              <span style={{ fontSize: '0.75rem', color: '#999' }}>(View Only)</span>
+            )}
           </Link>
 
           {/* Agent Builder - Only if user has permission */}
           {canAccessAgentBuilder && (
-            <Link href="/agent-builder">
-              <a className={styles.card}>
-                <h2>Agent Builder &rarr;</h2>
-                <p>Create new agents and capabilities from scratch</p>
-              </a>
+            <Link href="/agent-builder" className={styles.card}>
+              <h2>Agent Builder &rarr;</h2>
+              <p>Create new agents and capabilities from scratch</p>
             </Link>
           )}
 
           {/* User Management - Admin only */}
           {canManageUsers && (
-            <Link href="/admin-users">
-              <a className={styles.card}>
-                <h2>User Management &rarr;</h2>
-                <p>Manage users, permissions, and access levels</p>
-                <span style={{ fontSize: '0.75rem', color: '#0070f3' }}>(Admin Only)</span>
-              </a>
+            <Link href="/admin-users" className={styles.card}>
+              <h2>User Management &rarr;</h2>
+              <p>Manage users, permissions, and access levels</p>
+              <span style={{ fontSize: '0.75rem', color: '#0070f3' }}>(Admin Only)</span>
             </Link>
           )}
 
           {/* LiveKit Admin - Based on permissions */}
-          <Link href="/livekit-admin">
-            <a className={styles.card}>
-              <h2>LiveKit Admin &rarr;</h2>
-              <p>
-                {canAccessLivekitAdmin ? 'Manage' : 'View'} rooms, participants, and tokens
-              </p>
-              {!canAccessLivekitAdmin && (
-                <span style={{ fontSize: '0.75rem', color: '#999' }}>(View Only)</span>
-              )}
-            </a>
+          <Link href="/livekit-admin" className={styles.card}>
+            <h2>LiveKit Admin &rarr;</h2>
+            <p>
+              {canAccessLivekitAdmin ? 'Manage' : 'View'} rooms, participants, and tokens
+            </p>
+            {!canAccessLivekitAdmin && (
+              <span style={{ fontSize: '0.75rem', color: '#999' }}>(View Only)</span>
+            )}
           </Link>
 
           {/* Video Conference - Based on permissions */}
           {canAccessVideoConference ? (
-            <Link href="/meet">
-              <a className={styles.card}>
-                <h2>Video Conference &rarr;</h2>
-                <p>Join a video conference room with LiveKit</p>
-              </a>
+            <Link href="/meet" className={styles.card}>
+              <h2>Video Conference &rarr;</h2>
+              <p>Join a video conference room with LiveKit</p>
             </Link>
           ) : (
             <div className={`${styles.card}`} style={{ opacity: 0.5, cursor: 'not-allowed' }}>
@@ -141,11 +131,9 @@ const Home: NextPage<HomeProps> = ({ user }) => {
           )}
 
           {/* Change Password - Available to all */}
-          <Link href="/change-password">
-            <a className={styles.card}>
-              <h2>Change Password &rarr;</h2>
-              <p>Update your account password</p>
-            </a>
+          <Link href="/change-password" className={styles.card}>
+            <h2>Change Password &rarr;</h2>
+            <p>Update your account password</p>
           </Link>
         </div>
 

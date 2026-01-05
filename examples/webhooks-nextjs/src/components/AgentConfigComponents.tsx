@@ -15,24 +15,24 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ onLogout }) => (
   <>
     <div className={configStyles.backLink}>
-      <Link href="/">
-        <a className={configStyles.backLinkAnchor}>← Home</a>
+      <Link href="/" className={configStyles.backLinkAnchor}>
+        ← Home
       </Link>
     </div>
     <div className={configStyles.header}>
       <h1>Agent Configuration</h1>
       <div className={configStyles.navLinks}>
-        <Link href="/agent-builder">
-          <a className={configStyles.navLink}>Agent Builder</a>
+        <Link href="/agent-builder" className={configStyles.navLink}>
+          Agent Builder
         </Link>
-        <Link href="/admin-users">
-          <a className={configStyles.navLink}>Admin Users</a>
+        <Link href="/admin-users" className={configStyles.navLink}>
+          Admin Users
         </Link>
-        <Link href="/change-password">
-          <a className={configStyles.navLink}>Change Password</a>
+        <Link href="/change-password" className={configStyles.navLink}>
+          Change Password
         </Link>
-        <Link href="/livekit-admin">
-          <a className={configStyles.navLink}>LiveKit Admin</a>
+        <Link href="/livekit-admin" className={configStyles.navLink}>
+          LiveKit Admin
         </Link>
         <button onClick={onLogout} className={configStyles.logoutButton}>
           Logout

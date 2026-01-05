@@ -50,8 +50,8 @@ export default function Login() {
 
       <main className={styles.main}>
         <div className={loginStyles.backLink}>
-          <Link href="/">
-            <a className={loginStyles.backLinkAnchor}>← Home</a>
+          <Link href="/" className={loginStyles.backLinkAnchor}>
+            ← Home
           </Link>
         </div>
         <h1 className={styles.title}>
@@ -108,10 +108,8 @@ export default function Login() {
           </form>
 
           <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-            <Link href="/forgot-password">
-              <a style={{ color: '#0070f3', textDecoration: 'none', fontSize: '0.875rem' }}>
-                Forgot password?
-              </a>
+            <Link href="/forgot-password" style={{ color: '#0070f3', textDecoration: 'none', fontSize: '0.875rem' }}>
+              Forgot password?
             </Link>
           </div>
 
