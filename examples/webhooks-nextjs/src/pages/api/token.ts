@@ -1,13 +1,10 @@
 import { AccessToken } from 'livekit-server-sdk';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import getConfig from 'next/config';
-
-const { serverRuntimeConfig } = getConfig();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const token = new AccessToken(
-    serverRuntimeConfig.livekitApiKey,
-    serverRuntimeConfig.livekitApiSecret,
+    process.env.LIVEKIT_API_KEY!,
+    process.env.LIVEKIT_API_SECRET!,
     {
       identity: `user-${Date.now()}`,
     },

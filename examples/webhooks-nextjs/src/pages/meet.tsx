@@ -87,11 +87,11 @@ export default function Meet() {
 
       <div className={styles.formCard}>
         <div className={styles.navigation}>
-          <Link href="/">
-            <a className={styles.navLink}>← Home</a>
+          <Link href="/" className={styles.navLink}>
+            ← Home
           </Link>
-          <Link href="/livekit-admin">
-            <a className={styles.navLink}>← Admin Dashboard</a>
+          <Link href="/livekit-admin" className={styles.navLink}>
+            ← Admin Dashboard
           </Link>
         </div>
         <h1 className={styles.formTitle}>

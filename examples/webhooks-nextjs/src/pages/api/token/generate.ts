@@ -1,8 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import getConfig from 'next/config';
 import { AccessToken } from 'livekit-server-sdk';
-
-const { serverRuntimeConfig } = getConfig();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -17,8 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const at = new AccessToken(
-      serverRuntimeConfig.livekitApiKey,
-      serverRuntimeConfig.livekitApiSecret,
+      process.env.LIVEKIT_API_KEY!,
+      process.env.LIVEKIT_API_SECRET!,
       {
         identity: participantName,
         ttl: '10h', // Token valid for 10 hours

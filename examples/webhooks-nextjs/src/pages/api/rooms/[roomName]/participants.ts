@@ -1,8 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import getConfig from 'next/config';
 import { RoomServiceClient } from 'livekit-server-sdk';
-
-const { serverRuntimeConfig } = getConfig();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -19,8 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const livekitHost = 'ws://localhost:7880';
     const roomService = new RoomServiceClient(
       livekitHost,
-      serverRuntimeConfig.livekitApiKey,
-      serverRuntimeConfig.livekitApiSecret
+      process.env.LIVEKIT_API_KEY!,
+      process.env.LIVEKIT_API_SECRET!
     );
 
     const participants = await roomService.listParticipants(roomName);

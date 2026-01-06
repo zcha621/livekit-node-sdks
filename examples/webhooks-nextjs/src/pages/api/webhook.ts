@@ -1,13 +1,10 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { WebhookReceiver } from 'livekit-server-sdk';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import getConfig from 'next/config';
-
-const { serverRuntimeConfig } = getConfig();
 
 const receiver = new WebhookReceiver(
-  serverRuntimeConfig.livekitApiKey,
-  serverRuntimeConfig.livekitApiSecret,
+  process.env.LIVEKIT_API_KEY!,
+  process.env.LIVEKIT_API_SECRET!,
 );
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
